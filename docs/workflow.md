@@ -24,14 +24,27 @@ specs/
 
 El proyecto se lleva como vault de Obsidian: los enlaces `[[...]]` entre specs y hacia `data-model.md`/`screens.md`/`architecture.md` permiten visualizar las dependencias entre incrementos en el grafo. Esto es un beneficio adicional, no un requisito — los ficheros son markdown plano y funcionan igual sin Obsidian.
 
+## Ramas de Git
+
+- `main` — rama estable, desplegable a producción.
+- `develop` — rama de integración; los incrementos completados se fusionan aquí antes de pasar a `main`.
+- `feature/<código>` — una rama por incremento (p. ej. `feature/BAS-2`), creada desde `develop`, sin sufijo descriptivo adicional.
+
+Ciclo de vida de una rama de incremento:
+
+1. Al empezar a trabajar en `BAS-N` (inicio de la fase de propuesta), se crea `feature/BAS-N` desde `develop`.
+2. Todo el trabajo del incremento —`spec.md`, `plan.md`, `tasks.md` y la implementación— se realiza en esa rama.
+3. Al completarse el incremento, se abre un Pull Request de `feature/BAS-N` a `develop`.
+4. La rama **solo se fusiona y se cierra con confirmación humana explícita** — el asistente de IA nunca fusiona el PR ni elimina la rama por su cuenta, aunque todas las tareas de `tasks.md` estén completas.
+
 ## Ciclo por incremento
 
-1. **Propuesta (`spec.md`)** — qué se va a construir y por qué, alcance, historias de usuario, criterios de aceptación. Se redacta en conversación con el asistente.
+1. **Propuesta (`spec.md`)** — se crea la rama `feature/BAS-N` desde `develop` (ver "Ramas de Git"). Qué se va a construir y por qué, alcance, historias de usuario, criterios de aceptación. Se redacta en conversación con el asistente.
 2. **Aclaración** — antes de planificar, ronda explícita de preguntas para eliminar ambigüedad. Se documenta en la sección `## Aclaraciones` del propio `spec.md`.
 3. **Plan técnico (`plan.md`)** — qué entidades de `data-model.md` y qué pantallas de `screens.md` toca, y decisiones técnicas específicas del incremento no cubiertas ya por `architecture.md`.
 4. **Tareas (`tasks.md`)** — lista ordenada de tareas pequeñas y verificables (checkbox).
 5. **Implementación** — se ejecutan las tareas una a una, marcando checkboxes conforme se completan.
-6. **Cierre** — al completarse, la carpeta se mueve a `specs/archive/`; si el incremento reveló cambios de diseño no anticipados, se actualizan `data-model.md`/`screens.md`/`architecture.md` antes de archivar.
+6. **Cierre** — al completarse, la carpeta se mueve a `specs/archive/`; si el incremento reveló cambios de diseño no anticipados, se actualizan `data-model.md`/`screens.md`/`architecture.md` antes de archivar. Se abre el PR de `feature/BAS-N` a `develop` (ver "Ramas de Git") y se espera confirmación humana para fusionarlo.
 
 ## Estado de una spec
 

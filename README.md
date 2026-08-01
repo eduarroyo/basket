@@ -30,6 +30,7 @@ El desarrollo sigue un flujo dirigido por especificaciones (spec-driven developm
 - El trabajo se organiza en incrementos, cada uno identificado con un código secuencial `BAS-N` que se referencia en commits, ramas y PRs (p. ej. `BAS-2: competiciones y equipos`).
 - Cada incremento vive en `specs/BAS-N/` con tres ficheros: `spec.md` (qué y por qué), `plan.md` (cómo) y `tasks.md` (tareas concretas y verificables).
 - Ciclo por incremento: **propuesta → aclaración → plan → tareas → implementación → cierre**. El cierre archiva la carpeta en `specs/archive/` y actualiza `data-model.md`/`screens.md`/`architecture.md` si el incremento introdujo cambios de diseño no anticipados.
+- Cada incremento se trabaja en su propia rama `feature/BAS-N`, creada desde `develop` al empezar. Se cierra con un PR a `develop` que **solo se fusiona con confirmación humana explícita**.
 - Las specs usan propiedades de Obsidian (frontmatter YAML en `camelCase`) para poder visualizar las dependencias entre incrementos (`dependeDe`) como grafo.
 
 ## Estado del proyecto
