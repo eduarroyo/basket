@@ -16,7 +16,7 @@ Pantallas de solo lectura, candidatas directas a Output Caching.
 | Detalle de partido | Marcador, parciales por cuarto, sede, estado, motivo si es resuelto administrativamente | Partido, PartidoParcial | `/partidos/{id}` |
 | Resultados por jornada | Partidos jugados/resueltos/aplazados/cancelados de una jornada concreta | Jornada, Partido | `/competiciones/{id}/jornadas/{n}` |
 | Resultados por equipo | Histórico de partidos de un equipo en la temporada | Equipo, Partido | `/equipos/{id}/resultados` |
-| Clasificación | Tabla ordenada de la competición | ClasificacionEquipo | `/competiciones/{id}/clasificacion` |
+| Clasificación | Tabla ordenada de la competición | Partido (calculada) | `/competiciones/{id}/clasificacion` |
 | Ficha de equipo | Plantilla (dorsales/posiciones), club, sede habitual | Equipo, FichaJugador | `/equipos/{id}` |
 | Ficha de club | Equipos del club en la temporada actual | Club, Equipo | `/clubes/{id}` |
 | Ficha de sede | Dirección, municipio, próximos partidos allí | Sede, Partido | `/sedes/{id}` |
@@ -42,7 +42,7 @@ Pantallas de solo lectura, candidatas directas a Output Caching.
 | Plantilla de equipo | Alta/baja/edición de fichas (dorsal, posición) dentro de un equipo | FichaJugador |
 | Calendario (planificación) | Crear jornadas, programar partidos (equipos, fecha/hora, sede) | Jornada, Partido |
 | Resultados | Introducir marcador y parciales, o cambiar estado (aplazado/cancelado/resuelto + motivo + ganador) | Partido, PartidoParcial |
-| Clasificación | Vista de verificación del cálculo, con opción de forzar recálculo | ClasificacionEquipo |
+| Clasificación | Vista de verificación del cálculo (misma consulta que la pública, sin caché) | Partido (calculada) |
 
 `Calendario` y `Resultados` se mantienen como dos pantallas separadas aunque compartan la entidad `Partido`, porque el documento funcional las trata como dos funciones distintas (planificación vs. resultado).
 

@@ -17,7 +17,6 @@ erDiagram
     EQUIPO ||--o{ PARTIDO : "local / visitante"
     SEDE ||--o{ PARTIDO : "se juega en"
     PARTIDO ||--o{ PARTIDOPARCIAL : tiene
-    COMPETICION ||--o{ CLASIFICACIONEQUIPO : "calcula (derivada)"
 ```
 
 ## Entidades catálogo (independientes de temporada)
@@ -71,11 +70,13 @@ La sede es el pabellón físico y no cambia de una temporada a otra; lo que camb
 | Id | int (PK) | |
 | TemporadaId | FK → Temporada | |
 | CategoriaId | FK → Categoria | |
-| PuntosVictoria | int | Ej. 2 |
-| PuntosDerrota | int | Ej. 1 |
+| PuntosVictoria | int | Por defecto 2 |
+| PuntosDerrota | int | Por defecto 1 |
 
 - Restricción única: `(TemporadaId, CategoriaId)` — una competición por categoría y temporada.
 - Es la clave de aislamiento de datos por temporada y categoría: toda la información transaccional (equipos, calendario, resultados) cuelga de aquí.
+- Los valores por defecto (2/1) son los que fija el Reglamento General y de Competiciones de la F.A.B. para el sistema de liga (Art. 77) — configurables por competición, no fijos en el esquema; ver [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md).
+- Sin campo de "formato" (liga/copa/mixta): el reglamento no fija un formato único de competición (Art. 72), y no hace falta declararlo por adelantado — se construye jornada a jornada mediante `Jornada.Etiqueta` y `Jornada.CuentaParaClasificacion`, ver más abajo. Detalle de esta decisión en [[architecture#16. Formato de competición y fases finales|architecture.md, punto 16]].
 
 ### Equipo
 
@@ -117,9 +118,12 @@ Sustituye a un "Jugador" como entidad fuerte, por la decisión de no tratar dato
 | --- | --- | --- |
 | Id | int (PK) | |
 | CompeticionId | FK → Competicion | |
-| Numero | int | |
+| Numero | int | Orden cronológico dentro de la competición |
+| Etiqueta | string (nullable) | Texto libre para mostrar en vez de "Jornada {Numero}", p. ej. "Cuartos de Final", "Semifinal vuelta" |
+| CuentaParaClasificacion | bool | `true` por defecto |
 
 - Restricción única: `(CompeticionId, Numero)`.
+- `Etiqueta` y `CuentaParaClasificacion` permiten representar fases finales (copa, playoff) sin modelar un cuadro/bracket: el administrador crea las jornadas de fase final igual que las de liga regular, las etiqueta con texto libre y marca `CuentaParaClasificacion = false` para que el cálculo de la clasificación (ver más abajo) las ignore. No hay relación entre partidos de fases distintas (p. ej. qué semifinal alimenta a la final) — ver [[architecture#16. Formato de competición y fases finales|architecture.md, punto 16]] para la justificación y la mejora futura registrada si algún día hiciera falta un cuadro visual.
 
 ### Partido
 
@@ -141,6 +145,8 @@ Sustituye a un "Jugador" como entidad fuerte, por la decisión de no tratar dato
 
 Invariante de aplicación (no expresable como constraint simple de BD): un equipo no puede aparecer dos veces en la misma jornada, ni como local ni como visitante.
 
+Cuando `Estado = Resuelto`, el marcador técnico que se propone por defecto en `PuntosLocal`/`PuntosVisitante` (editable por el administrador) es **2-0** a favor de `EquipoGanadorResolucionId`, según el Reglamento General y de Competiciones de la F.A.B. (confirmado para varios supuestos de partido no completado — Art. 80, 148, 149.2 — no 20-0 como se apuntó tentativamente antes de consultar la normativa). Para incomparecencia no justificada y alineación indebida específicamente, el reglamento remite al Reglamento de Régimen Disciplinario de la F.A.B. (documento no consultado); se asume 2-0 por el patrón consistente del resto de supuestos, sin confirmación textual — ver [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md#4-marcador-técnico-y-resultados-administrativos-fab).
+
 ### PartidoParcial
 
 Estadísticas básicas por periodo.
@@ -157,13 +163,14 @@ Se modela como tabla hija en vez de columnas fijas Q1-Q4 para no forzar el núme
 
 ## Clasificación
 
-### ClasificacionEquipo (derivada, no es fuente de verdad)
+### Clasificación de una competición (calculada, sin tabla propia)
 
-Tabla de caché recalculada a partir de `Partido` cada vez que se guarda un resultado (o por job periódico), no editable directamente por un administrador.
+No existe una tabla `ClasificacionEquipo`: la clasificación se calcula al vuelo agregando `Partido` (estado `Jugado` o `Resuelto`) por `EquipoId` dentro de una `CompeticionId`, restringido a las jornadas con `CuentaParaClasificacion = true` (excluye fases finales de copa/playoff, ver `Jornada` más arriba), sin persistir el resultado. El detalle de esta decisión, los criterios de desempate y la alternativa descartada están en [[architecture#14. Clasificación como consulta calculada|architecture.md, punto 14]].
+
+Campos que produce el cálculo, por equipo:
 
 | Campo | Tipo | Notas |
 | --- | --- | --- |
-| CompeticionId | FK → Competicion | |
 | EquipoId | FK → Equipo | |
 | PartidosJugados | int | |
 | Victorias | int | |
@@ -171,9 +178,8 @@ Tabla de caché recalculada a partir de `Partido` cada vez que se guarda un resu
 | PuntosFavor | int | |
 | PuntosContra | int | |
 | PuntosClasificacion | int | Calculado con `PuntosVictoria`/`PuntosDerrota` de la Competicion |
-| ActualizadoEn | datetime | |
 
-Se modela como derivada (no normalizada) porque el requisito no funcional de consistencia eventual (máximo 5 minutos) permite tratarla como una caché, y esa misma clave (`CompeticionId`) sirve como partición natural de caché para cumplir el límite de 200ms en consultas de clasificación.
+Se modela como cálculo derivado (no como tabla) porque el requisito no funcional de consistencia eventual (máximo 5 minutos) permite servirlo desde caché de lectura (Output Caching) en vez de mantener un estado persistido, y `CompeticionId` sirve como partición natural tanto de la consulta como de esa caché para cumplir el límite de 200ms.
 
 ## Notas de diseño
 
@@ -184,6 +190,4 @@ Se modela como derivada (no normalizada) porque el requisito no funcional de con
 
 ## Pendiente de definir
 
-- Valores exactos del enum `Posicion` y si debe ser obligatorio.
-- Reglas de puntuación por defecto para partidos `Resueltos` (p. ej. marcador técnico 20-0) más allá de los puntos de clasificación.
-- Política de retención/archivado de temporadas finalizadas (mencionada en `functional.md`, aún sin concretar a nivel de esquema).
+- Nada pendiente en este documento por ahora — los tres puntos que figuraban aquí (valores del enum `Posicion`, reglas de puntuación en partidos `Resueltos`, retención de temporadas finalizadas) ya están resueltos: los dos primeros en las tablas de `FichaJugador` y `Partido` de más arriba, y la retención en [[architecture#17. Retención y protección de datos personales|architecture.md, punto 17]] (no aplica a los datos deportivos, que no son datos personales; solo a cuentas de administrador y telemetría, ya cubiertas por decisiones existentes).
