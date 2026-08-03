@@ -56,10 +56,12 @@ builder.Services.AddRazorPages(options =>
         }
     });
 
-    // El Area "Admin" exige el rol "Administrador" en todas sus páginas, salvo la
-    // propia pantalla de Login (si no, nadie podría llegar a autenticarse).
+    // El Area "Admin" exige el rol "Administrador" en todas sus páginas, salvo Login
+    // (si no, nadie podría llegar a autenticarse) y Logout (para poder mostrar la
+    // confirmación de cierre de sesión ya sin sesión activa).
     options.Conventions.AuthorizeAreaFolder("Admin", "/", "Administrador");
     options.Conventions.AllowAnonymousToAreaPage("Admin", "/Login");
+    options.Conventions.AllowAnonymousToAreaPage("Admin", "/Logout");
 });
 
 var app = builder.Build();
