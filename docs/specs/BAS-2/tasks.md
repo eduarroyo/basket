@@ -21,7 +21,7 @@ tags:
 - [x] Implementar el seed idempotente del primer administrador, leyendo credenciales de `dotnet user-secrets` en local.
 - [x] Aplicar las migraciones de EF Core automáticamente al arrancar en `Development` (no en otros entornos, `architecture.md` punto 13); documentar el proceso de migraciones en `README.md`.
 - [x] Crear la Portada mínima (`/`) en el Area `Public`, accesible sin autenticación.
-- [ ] Crear `tests/BasketBaseTracker.Tests/` (xUnit v3 + `Aspire.Hosting.Testing`) con un test de integración que levante el `AppHost` y compruebe el health check de `Web`.
+- [x] Crear `tests/BasketBaseTracker.Tests/` (xUnit v3 + `Aspire.Hosting.Testing`) con un test de integración que levante el `AppHost` y compruebe el health check de `Web`.
 - [ ] Crear `tests/BasketBaseTracker.Tests.E2E/` (xUnit v3 + Playwright) con un test que navegue a la Portada sin autenticarse.
 - [ ] Verificar `aspire run`: `AppHost`, `Web` y la base de datos local levantan sin errores.
 - [ ] Verificar `dotnet test`: todos los tests (`Tests` y `Tests.E2E`) pasan.
