@@ -1,10 +1,33 @@
 using BasketBaseTracker.Web.Data;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
 builder.AddSqlServerDbContext<ApplicationDbContext>("basketbasetracker");
+
+// Identity: autenticación por cookies, con roles (rol único "Administrador" en v1 —
+// architecture.md punto 7). Sin autorregistro ni confirmación por email, así que se
+// desactiva ese flujo; contraseña más estricta que el valor por defecto de Identity.
+builder.Services
+    .AddIdentity<IdentityUser, IdentityRole>(options =>
+    {
+        options.SignIn.RequireConfirmedAccount = false;
+        options.Password.RequiredLength = 12;
+    })
+    .AddEntityFrameworkStores<ApplicationDbContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Admin/Login";
+    options.LogoutPath = "/Admin/Logout";
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
+});
 
 // Add services to the container.
 builder.Services.AddRazorPages(options =>
@@ -32,6 +55,11 @@ builder.Services.AddRazorPages(options =>
             }
         }
     });
+
+    // El Area "Admin" exige el rol "Administrador" en todas sus páginas, salvo la
+    // propia pantalla de Login (si no, nadie podría llegar a autenticarse).
+    options.Conventions.AuthorizeAreaFolder("Admin", "/", "Administrador");
+    options.Conventions.AllowAnonymousToAreaPage("Admin", "/Login");
 });
 
 var app = builder.Build();
@@ -48,6 +76,7 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
