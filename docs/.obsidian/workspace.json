@@ -11,10 +11,14 @@
             "id": "a1f4f802504d0593",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "specs/archive/BAS-1/spec.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "Nueva pestaña"
+              "title": "spec"
             }
           }
         ]
@@ -183,14 +187,19 @@
   },
   "active": "a1f4f802504d0593",
   "lastOpenFiles": [
+    "specs/archive/BAS-1/tasks.md",
+    "specs/archive/BAS-1/plan.md",
+    "specs/archive/BAS-1/spec.md.tmp.13216.48685bf7cea9",
+    "workflow.md.tmp.13216.7646cdb6dcd8",
+    "workflow.md.tmp.13216.5a0565d0fb7e",
+    "workflow.md.tmp.13216.dd423b55bac6",
+    "specs/archive/BAS-1/spec.md",
+    "specs/archive/BAS-1",
+    "specs/archive",
+    "specs",
     "architecture.md.tmp.13216.e49877e72fd3",
     "architecture.md.tmp.13216.1b0ca1564cb5",
     "architecture.md.tmp.13216.095e1d6a3612",
-    "data-model.md.tmp.13216.f72eb054feee",
-    "data-model.md.tmp.13216.6228ca82d1ad",
-    "data-model.md.tmp.13216.5c9cdfb3a558",
-    "data-model.md.tmp.13216.5519e33d255c",
-    "data-model.md.tmp.13216.523778c28cfc",
     "reglamento/render/fab_76.png",
     "reglamento/render/fab_75.png",
     "reglamento/render/fab_74.png",

@@ -11,16 +11,19 @@ Cada incremento tiene un código secuencial **`BAS-N`** (BasketBaseTracker), asi
 ## Estructura de carpetas
 
 ```text
-specs/
-  BAS-1/
-    spec.md      # qué y por qué
-    plan.md      # cómo
-    tasks.md     # tareas concretas y verificables
-  BAS-2/
-    ...
-  archive/
-    BAS-1/       # incrementos completados se mueven aquí
+docs/
+  specs/
+    BAS-1/
+      spec.md      # qué y por qué
+      plan.md      # cómo
+      tasks.md     # tareas concretas y verificables
+    BAS-2/
+      ...
+    archive/
+      BAS-1/       # incrementos completados se mueven aquí
 ```
+
+Vive dentro de `docs/` (no en la raíz del repositorio) para que quede dentro de la bóveda de Obsidian, cuya raíz es `docs/` — así los enlaces `[[...]]` entre specs y hacia `data-model.md`/`screens.md`/`architecture.md` funcionan sin rutas relativas incómodas.
 
 El proyecto se lleva como vault de Obsidian: los enlaces `[[...]]` entre specs y hacia `data-model.md`/`screens.md`/`architecture.md` permiten visualizar las dependencias entre incrementos en el grafo. Esto es un beneficio adicional, no un requisito — los ficheros son markdown plano y funcionan igual sin Obsidian.
 
@@ -44,7 +47,7 @@ Ciclo de vida de una rama de incremento:
 3. **Plan técnico (`plan.md`)** — qué entidades de `data-model.md` y qué pantallas de `screens.md` toca, y decisiones técnicas específicas del incremento no cubiertas ya por `architecture.md`.
 4. **Tareas (`tasks.md`)** — lista ordenada de tareas pequeñas y verificables (checkbox).
 5. **Implementación** — se ejecutan las tareas una a una, marcando checkboxes conforme se completan.
-6. **Cierre** — al completarse, la carpeta se mueve a `specs/archive/`; si el incremento reveló cambios de diseño no anticipados, se actualizan `data-model.md`/`screens.md`/`architecture.md` antes de archivar. Se abre el PR de `feature/BAS-N` a `develop` (ver "Ramas de Git") y se espera confirmación humana para fusionarlo.
+6. **Cierre** — al completarse, la carpeta se mueve a `docs/specs/archive/`; si el incremento reveló cambios de diseño no anticipados, se actualizan `data-model.md`/`screens.md`/`architecture.md` antes de archivar. Se abre el PR de `feature/BAS-N` a `develop` (ver "Ramas de Git") y se espera confirmación humana para fusionarlo.
 
 ## Estado de una spec
 
@@ -90,7 +93,7 @@ tags:
 - [[architecture]] — decisiones ...
 ```
 
-`dependeDe` se omite si el incremento no depende de ningún otro. `tags` describe el tipo de trabajo (`backend`, `frontend`, `documentación`...), no que sea una spec — eso ya lo indica su ubicación en `specs/`.
+`dependeDe` se omite si el incremento no depende de ningún otro. `tags` describe el tipo de trabajo (`backend`, `frontend`, `documentación`...), no que sea una spec — eso ya lo indica su ubicación en `docs/specs/`.
 
 ### `plan.md`
 

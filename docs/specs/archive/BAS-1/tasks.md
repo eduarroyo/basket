@@ -25,4 +25,5 @@ tags:
 - [x] Documentar el procedimiento para alineación indebida sin mala fe usando `Partido.Observaciones` en vez de un modelo nuevo.
 - [x] Registrar en `## Mejoras futuras` de `architecture.md` las alternativas descartadas (MF-1 a MF-7).
 - [x] Verificar que no quedan entradas en "Pendiente de definir" de `data-model.md` ni de `architecture.md` (salvo la validación de GHCR/Aspire al implementar, que es un riesgo a vigilar, no una decisión pendiente).
-- [x] Crear esta spec retroactivamente en `specs/archive/BAS-1/` para dejar constancia en el histórico.
+- [x] Crear esta spec retroactivamente en `docs/specs/archive/BAS-1/` para dejar constancia en el histórico.
+- [x] Mover `specs/` a `docs/specs/` para que quede dentro de la bóveda de Obsidian (raíz `docs/`).

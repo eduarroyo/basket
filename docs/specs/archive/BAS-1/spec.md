@@ -37,7 +37,7 @@ Sentar la base documental completa del proyecto antes de escribir ninguna línea
 
 ## Aclaraciones
 
-Esta spec se redacta **a posteriori**, una vez completado y ya fusionado a `develop` todo el trabajo que describe — no existía como carpeta `specs/BAS-1/` mientras se hacía el trabajo, porque la disciplina de spec-driven development de `workflow.md` se adoptó y se fue refinando durante el propio desarrollo de esta documentación. Se crea ahora, directamente en `specs/archive/`, para que quede constancia en el histórico de specs y `BAS-2` sea coherente con la numeración secuencial.
+Esta spec se redacta **a posteriori**, una vez completado y ya fusionado a `develop` todo el trabajo que describe — no existía como carpeta `docs/specs/BAS-1/` mientras se hacía el trabajo, porque la disciplina de spec-driven development de `workflow.md` se adoptó y se fue refinando durante el propio desarrollo de esta documentación. Se crea ahora, directamente en `docs/specs/archive/`, para que quede constancia en el histórico de specs y `BAS-2` sea coherente con la numeración secuencial.
 
 Nota de proceso a tener en cuenta para incrementos futuros: el refinamiento iterativo de esta documentación (estrategia de pruebas, observabilidad, caché, clasificación, seguridad, import/export, formato de competición, reglamento FIBA/FAB) se hizo mediante commits directos a `develop`, no en una rama `feature/BAS-1`, porque el incremento ya se había fusionado antes de empezar ese refinamiento. A partir de `BAS-2`, todo el trabajo — incluidas las revisiones de documentación de un incremento ya creado — debe hacerse en su rama `feature/BAS-N` correspondiente, tal como fija `workflow.md`.
 

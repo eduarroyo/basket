@@ -12,7 +12,7 @@ Plataforma de seguimiento de la competición de baloncesto base de la provincia 
 
 ## Reglas de trabajo obligatorias
 
-- Todo el trabajo de desarrollo sigue el ciclo de `docs/workflow.md`: cada incremento es una spec `BAS-N` en `specs/BAS-N/` (spec.md → plan.md → tasks.md → implementación → cierre).
+- Todo el trabajo de desarrollo sigue el ciclo de `docs/workflow.md`: cada incremento es una spec `BAS-N` en `docs/specs/BAS-N/` (spec.md → plan.md → tasks.md → implementación → cierre).
 - Cada incremento se trabaja en su propia rama `feature/BAS-N`, creada desde `develop`.
 - **Nunca fusionar un PR ni borrar una rama sin confirmación humana explícita**, aunque todas las tareas de `tasks.md` estén completas.
 - Usar siempre las CLIs de Aspire y de .NET para crear/gestionar proyectos (ver skills `aspire` y `dotnet` en `.claude/skills/`) — nunca escribir a mano ficheros de proyecto que esas herramientas generan.
