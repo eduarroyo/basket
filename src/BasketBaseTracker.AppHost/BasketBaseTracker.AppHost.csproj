@@ -4,6 +4,10 @@
     <ProjectReference Include="..\BasketBaseTracker.Web\BasketBaseTracker.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.SqlServer" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <UserSecretsId>77e1641c-446c-457c-92b0-37f11dee9654</UserSecretsId>
