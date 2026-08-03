@@ -11,7 +11,7 @@ tags:
 - [x] Habilitar Central Package Management (`Directory.Packages.props` en la raíz, `dotnet new packagesprops`).
 - [x] Migrar la solución a formato `.slnx` (`dotnet sln migrate`) y eliminar el `.sln` clásico.
 - [x] Crear `Directory.Build.props` (`TargetFramework`, `ImplicitUsings`, `Nullable` compartidos) y quitar esas propiedades de los `.csproj` individuales.
-- [ ] Crear `src/BasketBaseTracker.Web/` (Razor Pages) y añadirlo al `AppHost`.
+- [x] Crear `src/BasketBaseTracker.Web/` (Razor Pages) y añadirlo al `AppHost`.
 - [ ] Añadir las Areas `Public` y `Admin` en `Web`.
 - [ ] Añadir el recurso de base de datos local al `AppHost` (`AddSqlServer().AddDatabase(...)`) y referenciarlo desde `Web`.
 - [ ] Configurar EF Core y el `DbContext` de Identity en `Web`.

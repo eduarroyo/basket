@@ -40,5 +40,6 @@
 
   <Project Path="src/BasketBaseTracker.AppHost/BasketBaseTracker.AppHost.csproj" />
   <Project Path="src/BasketBaseTracker.ServiceDefaults/BasketBaseTracker.ServiceDefaults.csproj" />
+  <Project Path="src/BasketBaseTracker.Web/BasketBaseTracker.Web.csproj" />
 
 </Solution>
