@@ -43,11 +43,31 @@ Ciclo de vida de una rama de incremento:
 ## Ciclo por incremento
 
 1. **Propuesta (`spec.md`)** — se crea la rama `feature/BAS-N` desde `develop` (ver "Ramas de Git"). Qué se va a construir y por qué, alcance, historias de usuario, criterios de aceptación. Se redacta en conversación con el asistente.
-2. **Aclaración** — antes de planificar, ronda explícita de preguntas para eliminar ambigüedad. Se documenta en la sección `## Aclaraciones` del propio `spec.md`.
+2. **Aclaración** — antes de planificar, ronda explícita de preguntas para eliminar ambigüedad. Se documenta en la sección `## Aclaraciones` del propio `spec.md`. No se pasa a "Planificado" sin cumplir la Definición de Listo (ver más abajo).
 3. **Plan técnico (`plan.md`)** — qué entidades de `data-model.md` y qué pantallas de `screens.md` toca, y decisiones técnicas específicas del incremento no cubiertas ya por `architecture.md`.
 4. **Tareas (`tasks.md`)** — lista ordenada de tareas pequeñas y verificables (checkbox).
 5. **Implementación** — se ejecutan las tareas una a una, marcando checkboxes conforme se completan.
-6. **Cierre** — al completarse, la carpeta se mueve a `docs/specs/archive/`; si el incremento reveló cambios de diseño no anticipados, se actualizan `data-model.md`/`screens.md`/`architecture.md` antes de archivar. Se abre el PR de `feature/BAS-N` a `develop` (ver "Ramas de Git") y se espera confirmación humana para fusionarlo.
+6. **Cierre** — al completarse, la carpeta se mueve a `docs/specs/archive/`; si el incremento reveló cambios de diseño no anticipados, se actualizan `data-model.md`/`screens.md`/`architecture.md` antes de archivar. Se abre el PR de `feature/BAS-N` a `develop` (ver "Ramas de Git") y se espera confirmación humana para fusionarlo. No se marca `Completado` sin cumplir la Definición de Hecho (ver más abajo).
+
+## Definición de Listo (DoR) y Definición de Hecho (DoD)
+
+No son una ceremonia nueva — consolidan en un checklist único disciplina que ya exigen `workflow.md` y `architecture.md` por separado, para no tener que redescubrirla en cada incremento (especialmente útil para el asistente de IA, que no tiene memoria entre sesiones más allá de estos documentos).
+
+### Definición de Listo — antes de pasar de "En aclaración" a "Planificado"
+
+- [ ] `spec.md` tiene `Descripción`, `Alcance` y `Fuera de alcance` redactados (no solo el esqueleto de la plantilla).
+- [ ] `## Aclaraciones` recoge las preguntas relevantes y sus respuestas — sin ambigüedad abierta conocida.
+- [ ] Los criterios de aceptación son verificables (se puede responder sí/no a cada uno, no son aspiraciones vagas).
+- [ ] Si depende de otro incremento, `dependeDe` lo indica y ese incremento está `Completado` o `Archivado`.
+- [ ] Las entidades de `data-model.md` y pantallas de `screens.md` que toca están identificadas, aunque el detalle fino se cierre en `plan.md`.
+
+### Definición de Hecho — antes de pasar de "En implementación" a "Completado"
+
+- [ ] Todos los criterios de aceptación de `spec.md` se cumplen y todas las tareas de `tasks.md` están marcadas.
+- [ ] Hay test unitario para la lógica de negocio nueva y de integración para páginas/endpoints nuevos (`architecture.md`, punto 15), y pasan en CI.
+- [ ] Si el incremento reveló cambios de diseño no anticipados, `data-model.md`/`screens.md`/`architecture.md` ya están actualizados para reflejarlos (paso de Cierre).
+- [ ] La rama `feature/BAS-N` compila y pasa CI sin pasos saltados (`--no-verify` o equivalente).
+- [ ] El PR a `develop` está abierto — fusionarlo sigue exigiendo confirmación humana explícita (ver "Ramas de Git").
 
 ## Estado de una spec
 
