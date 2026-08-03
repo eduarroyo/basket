@@ -17,6 +17,8 @@ erDiagram
     EQUIPO ||--o{ PARTIDO : "local / visitante"
     SEDE ||--o{ PARTIDO : "se juega en"
     PARTIDO ||--o{ PARTIDOPARCIAL : tiene
+    EQUIPO ||--o{ PENALIZACIONCLASIFICACION : sanciona
+    PARTIDO ||--o{ PENALIZACIONCLASIFICACION : origina
 ```
 
 ## Entidades catálogo (independientes de temporada)
@@ -145,7 +147,7 @@ Sustituye a un "Jugador" como entidad fuerte, por la decisión de no tratar dato
 
 Invariante de aplicación (no expresable como constraint simple de BD): un equipo no puede aparecer dos veces en la misma jornada, ni como local ni como visitante.
 
-Cuando `Estado = Resuelto`, el marcador técnico que se propone por defecto en `PuntosLocal`/`PuntosVisitante` (editable por el administrador) es **2-0** a favor de `EquipoGanadorResolucionId`, según el Reglamento General y de Competiciones de la F.A.B. (confirmado para varios supuestos de partido no completado — Art. 80, 148, 149.2 — no 20-0 como se apuntó tentativamente antes de consultar la normativa). Para incomparecencia no justificada y alineación indebida específicamente, el reglamento remite al Reglamento de Régimen Disciplinario de la F.A.B. (documento no consultado); se asume 2-0 por el patrón consistente del resto de supuestos, sin confirmación textual — ver [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md#4-marcador-técnico-y-resultados-administrativos-fab).
+Cuando `Estado = Resuelto`, el marcador técnico que se propone por defecto en `PuntosLocal`/`PuntosVisitante` (editable por el administrador) es **2-0** a favor de `EquipoGanadorResolucionId`, según el Reglamento General y de Competiciones de la F.A.B. (confirmado para varios supuestos de partido no completado — Art. 80, 148, 149.2 — no 20-0 como se apuntó tentativamente antes de consultar la normativa). Para incomparecencia no justificada y alineación indebida **con mala fe o negligencia**, el Reglamento Disciplinario de la F.A.B. (Art. 43) confirma el mismo tratamiento de pérdida del encuentro, con una salvedad importante que este modelo **todavía no soporta**: añade además un descuento de 1 punto en la clasificación, algo que no existe en ningún otro supuesto (Art. 80 dice expresamente lo contrario) y para lo que no hay ningún campo en `Competicion`/`Jornada`/`Partido`. La alineación indebida **sin mala fe ni negligencia** no lleva marcador técnico en absoluto: se anula el encuentro y se repite (Art. 44) — un caso que tampoco está representado hoy (el `Estado = Resuelto` con `MotivoResolucion = AlineacionIndebida` asume implícitamente que hay un ganador, cuando este supuesto no lo tiene). Ver detalle completo en [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md#4-marcador-técnico-y-resultados-administrativos-fab).
 
 ### PartidoParcial
 

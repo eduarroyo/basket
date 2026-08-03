@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "e092384e2eeaaa06",
+        "id": "a277788fcf222aac",
         "type": "tabs",
         "children": [
           {
-            "id": "2de88036ff6600cc",
+            "id": "a1f4f802504d0593",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Vista gráfica"
+              "icon": "lucide-file",
+              "title": "Nueva pestaña"
             }
           }
         ]
@@ -181,7 +181,7 @@
       "bases:Crear nueva base": false
     }
   },
-  "active": "2de88036ff6600cc",
+  "active": "a1f4f802504d0593",
   "lastOpenFiles": [
     "architecture.md.tmp.13216.e49877e72fd3",
     "architecture.md.tmp.13216.1b0ca1564cb5",
@@ -191,16 +191,13 @@
     "data-model.md.tmp.13216.5c9cdfb3a558",
     "data-model.md.tmp.13216.5519e33d255c",
     "data-model.md.tmp.13216.523778c28cfc",
-    "data-model.md.tmp.13216.705bbab0e607",
     "reglamento/render/fab_76.png",
     "reglamento/render/fab_75.png",
     "reglamento/render/fab_74.png",
     "reglamento/render/fab_61.png",
     "reglamento/render/fab_60.png",
     "reglamento/render/fab_59.png",
-    "reglamento/render",
     "reglamento/resumen-reglas-relevantes.md",
-    "reglamento/resumen-reglas-relevantes.md.tmp.13216.e8d596598439",
     "architecture.md",
     "data-model.md",
     "functional.md",
