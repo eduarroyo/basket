@@ -7,7 +7,10 @@ tags:
 
 # BAS-2: Tareas
 
-- [ ] Crear `AppHost` y `ServiceDefaults` con la CLI de Aspire (skill `aspire`).
+- [x] Crear `AppHost` y `ServiceDefaults` con la CLI de Aspire (skill `aspire`).
+- [x] Habilitar Central Package Management (`Directory.Packages.props` en la raíz, `dotnet new packagesprops`).
+- [x] Migrar la solución a formato `.slnx` (`dotnet sln migrate`) y eliminar el `.sln` clásico.
+- [x] Crear `Directory.Build.props` (`TargetFramework`, `ImplicitUsings`, `Nullable` compartidos) y quitar esas propiedades de los `.csproj` individuales.
 - [ ] Crear `src/BasketBaseTracker.Web/` (Razor Pages) y añadirlo al `AppHost`.
 - [ ] Añadir las Areas `Public` y `Admin` en `Web`.
 - [ ] Añadir el recurso de base de datos local al `AppHost` (`AddSqlServer().AddDatabase(...)`) y referenciarlo desde `Web`.

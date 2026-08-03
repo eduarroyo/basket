@@ -27,6 +27,8 @@ Vive dentro de `docs/` (no en la raíz del repositorio) para que quede dentro de
 
 El proyecto se lleva como vault de Obsidian: los enlaces `[[...]]` entre specs y hacia `data-model.md`/`screens.md`/`architecture.md` permiten visualizar las dependencias entre incrementos en el grafo. Esto es un beneficio adicional, no un requisito — los ficheros son markdown plano y funcionan igual sin Obsidian.
 
+`docs/` (incluida cada carpeta de spec nueva) también está listado explícitamente en `BasketBaseTracker.slnx` como carpetas de solución, para verlo en el explorador de soluciones del IDE. `.slnx` no soporta comodines todavía (issue abierto en `dotnet/sdk`), así que al crear los ficheros de un incremento nuevo hay que añadirlos también a mano al `.slnx` — si esto se vuelve tedioso, revisar si Microsoft ya ha añadido soporte de comodines antes de seguir manteniéndolo a mano.
+
 ## Ramas de Git
 
 - `main` — rama estable, desplegable a producción.
