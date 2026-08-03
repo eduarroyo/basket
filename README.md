@@ -33,9 +33,36 @@ El desarrollo sigue un flujo dirigido por especificaciones (spec-driven developm
 - Cada incremento se trabaja en su propia rama `feature/BAS-N`, creada desde `develop` al empezar. Se cierra con un PR a `develop` que **solo se fusiona con confirmación humana explícita**.
 - Las specs usan propiedades de Obsidian (frontmatter YAML en `camelCase`) para poder visualizar las dependencias entre incrementos (`dependeDe`) como grafo.
 
+### Arranque en local
+
+Requisitos previos: SDK de .NET 10 estable (ver `global.json`), Docker Desktop (o equivalente) para el contenedor de SQL Server, y certificado HTTPS de desarrollo (`dotnet dev-certs https --trust`, una vez por máquina).
+
+1. `dotnet tool restore` — instala en el repo las herramientas de línea de comandos versionadas en `.config/dotnet-tools.json` (`dotnet-ef`, `dotnet-aspnet-codegenerator`, `aspire.cli`).
+2. Configurar las credenciales del primer administrador. No hay pantalla de alta pública: la primera cuenta la crea un *seed* idempotente al arrancar, leyendo `user-secrets` en local (`docs/architecture.md`, punto 7):
+   ```bash
+   dotnet user-secrets set "Seed:AdminEmail" "tu-email@ejemplo.com" --project src/BasketBaseTracker.Web
+   dotnet user-secrets set "Seed:AdminPassword" "UnaClaveDeAlMenos12Caracteres!" --project src/BasketBaseTracker.Web
+   ```
+   Sin esto, el arranque falla con un error explícito indicando qué configurar (no arranca con un administrador sin credenciales conocidas).
+3. `aspire run` desde la raíz del repo — levanta `Web` y el contenedor local de SQL Server con dashboard de logs/trazas/métricas.
+
+### Migraciones de base de datos
+
+- **En `Development`**: se aplican automáticamente al arrancar la aplicación (`Program.cs` llama a `Database.MigrateAsync()` antes del *seed* del administrador). No hace falta ningún paso manual, ni siquiera después de borrar el volumen de datos de SQL Server — un `aspire run` sobre una base de datos vacía crea el esquema solo.
+- **En cualquier otro entorno** (producción): nunca se aplican al arrancar la aplicación — `docs/architecture.md` (punto 13) lo evita explícitamente, para que varias réplicas de Container Apps no intenten migrar a la vez en un pico de tráfico. Se aplican como paso explícito y controlado del pipeline de despliegue, antes de publicar la nueva revisión:
+  ```bash
+  dotnet ef database update --project src/BasketBaseTracker.Web --connection "<cadena de conexión del entorno>"
+  ```
+
+Para crear una migración nueva (en cualquier entorno, no depende de development/producción):
+
+```bash
+dotnet ef migrations add <Nombre> --project src/BasketBaseTracker.Web
+```
+
 ## Estado del proyecto
 
-En fase de diseño: requisitos, modelo de datos, inventario de pantallas y arquitectura ya definidos. Aún no hay código — el siguiente paso es montar el esqueleto de la solución.
+En desarrollo activo. Diseño (requisitos, modelo de datos, inventario de pantallas, arquitectura) completo; implementación en curso — ver el incremento en curso en `docs/specs/`.
 
 ## Recursos de desarrollo
 

@@ -1,5 +1,6 @@
 using BasketBaseTracker.Web.Data;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +66,17 @@ builder.Services.AddRazorPages(options =>
 });
 
 var app = builder.Build();
+
+// Solo en desarrollo: en el resto de entornos las migraciones se aplican como paso
+// explícito del pipeline (architecture.md punto 13), no al arrancar cada instancia
+// (evita que varias réplicas intenten migrar a la vez).
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    await scope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.MigrateAsync();
+}
+
+await IdentitySeeder.SeedAdministradorAsync(app);
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

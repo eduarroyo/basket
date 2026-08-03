@@ -18,7 +18,8 @@ tags:
 - [x] Añadir ASP.NET Core Identity a `Web` (paquetes, servicios, autenticación por cookies, rol `Administrador`).
 - [x] Generar y aplicar la primera migración de EF Core (esquema de Identity).
 - [x] Scaffoldear solo `Login`/`Logout` de la UI de Identity (sin registro ni recuperación de contraseña).
-- [ ] Implementar el seed idempotente del primer administrador, leyendo credenciales de `dotnet user-secrets` en local.
+- [x] Implementar el seed idempotente del primer administrador, leyendo credenciales de `dotnet user-secrets` en local.
+- [x] Aplicar las migraciones de EF Core automáticamente al arrancar en `Development` (no en otros entornos, `architecture.md` punto 13); documentar el proceso de migraciones en `README.md`.
 - [ ] Crear la Portada mínima (`/`) en el Area `Public`, accesible sin autenticación.
 - [ ] Crear `tests/BasketBaseTracker.Tests/` (xUnit v3 + `Aspire.Hosting.Testing`) con un test de integración que levante el `AppHost` y compruebe el health check de `Web`.
 - [ ] Crear `tests/BasketBaseTracker.Tests.E2E/` (xUnit v3 + Playwright) con un test que navegue a la Portada sin autenticarse.
