@@ -12,7 +12,7 @@ tags:
 - [x] Migrar la solución a formato `.slnx` (`dotnet sln migrate`) y eliminar el `.sln` clásico.
 - [x] Crear `Directory.Build.props` (`TargetFramework`, `ImplicitUsings`, `Nullable` compartidos) y quitar esas propiedades de los `.csproj` individuales.
 - [x] Crear `src/BasketBaseTracker.Web/` (Razor Pages) y añadirlo al `AppHost`.
-- [ ] Añadir las Areas `Public` y `Admin` en `Web`.
+- [x] Añadir las Areas `Public` y `Admin` en `Web`.
 - [ ] Añadir el recurso de base de datos local al `AppHost` (`AddSqlServer().AddDatabase(...)`) y referenciarlo desde `Web`.
 - [ ] Configurar EF Core y el `DbContext` de Identity en `Web`.
 - [ ] Añadir ASP.NET Core Identity a `Web` (paquetes, servicios, autenticación por cookies, rol `Administrador`).

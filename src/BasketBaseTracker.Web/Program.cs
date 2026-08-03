@@ -3,7 +3,32 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 // Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddRazorPages(options =>
+{
+    // El Area "Public" no lleva prefijo de ruta: sus páginas deben resolver en la
+    // misma URL que si no hubiera Areas (p. ej. Index -> "/", no "/Public"), tal
+    // como define docs/screens.md. El Area "Admin" sí conserva su prefijo por defecto.
+    options.Conventions.AddAreaFolderRouteModelConvention("Public", "/", model =>
+    {
+        foreach (var selector in model.Selectors)
+        {
+            var template = selector.AttributeRouteModel?.Template;
+            if (string.IsNullOrEmpty(template))
+            {
+                continue;
+            }
+
+            if (template.Equals("Public", StringComparison.OrdinalIgnoreCase))
+            {
+                selector.AttributeRouteModel!.Template = string.Empty;
+            }
+            else if (template.StartsWith("Public/", StringComparison.OrdinalIgnoreCase))
+            {
+                selector.AttributeRouteModel!.Template = template["Public/".Length..];
+            }
+        }
+    });
+});
 
 var app = builder.Build();
 

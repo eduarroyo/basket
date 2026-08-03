@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace BasketBaseTracker.Web.Pages;
+namespace BasketBaseTracker.Web.Areas.Public.Pages;
 
 public class IndexModel : PageModel
 {
