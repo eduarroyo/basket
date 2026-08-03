@@ -115,12 +115,22 @@ Con manifiesto local, cada comando de la herramienta se invoca con `dotnet <herr
 
 ## EF Core
 
+Requiere el paquete `Microsoft.EntityFrameworkCore.Design` en el proyecto (`Web`), con `PrivateAssets="all"` (solo se usa en tiempo de diseño, no debe llegar al artefacto publicado).
+
 Migraciones:
 
 ```bash
 dotnet ef migrations add <Nombre> --project src/BasketBaseTracker.Web
-dotnet ef database update --project src/BasketBaseTracker.Web
 ```
+
+`dotnet ef migrations add` no necesita conexión real (solo el modelo). `dotnet ef database update` sí — y como `Program.cs` usa `AddSqlServerDbContext` (Aspire), la cadena de conexión solo se inyecta automáticamente cuando el proceso lo arranca el `AppHost`. Para aplicar una migración a mano fuera de `aspire run`, hay que pasarla explícitamente:
+
+```bash
+dotnet ef database update --project src/BasketBaseTracker.Web --connection "Server=127.0.0.1,<puerto>;Database=basketbasetracker;User Id=sa;Password=<...>;TrustServerCertificate=True;"
+```
+
+- Puerto y contraseña del contenedor local: `docker ps` (columna *Ports*) y `docker inspect <contenedor> --format '{{range .Config.Env}}{{println .}}{{end}}'` (variable `MSSQL_SA_PASSWORD`).
+- **Usar `127.0.0.1`, nunca `localhost`**, en la cadena de conexión: en Windows, `localhost` puede resolver primero a IPv6 (`::1`), y el puerto publicado por Docker Desktop normalmente solo escucha en IPv4 (`127.0.0.1:<puerto>->1433/tcp`) — con `localhost` la conexión falla por timeout (Error 258) aunque el contenedor esté sano; con `127.0.0.1` funciona a la primera.
 
 ## Scaffolding de CRUD (Razor Pages + EF Core)
 

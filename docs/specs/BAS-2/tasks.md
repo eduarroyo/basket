@@ -16,7 +16,7 @@ tags:
 - [x] Añadir el recurso de base de datos local al `AppHost` (`AddSqlServer().AddDatabase(...)`) y referenciarlo desde `Web`.
 - [x] Configurar EF Core y el `DbContext` de Identity en `Web`.
 - [ ] Añadir ASP.NET Core Identity a `Web` (paquetes, servicios, autenticación por cookies, rol `Administrador`).
-- [ ] Generar y aplicar la primera migración de EF Core (esquema de Identity).
+- [x] Generar y aplicar la primera migración de EF Core (esquema de Identity).
 - [ ] Scaffoldear solo `Login`/`Logout` de la UI de Identity (sin registro ni recuperación de contraseña).
 - [ ] Implementar el seed idempotente del primer administrador, leyendo credenciales de `dotnet user-secrets` en local.
 - [ ] Crear la Portada mínima (`/`) en el Area `Public`, accesible sin autenticación.
