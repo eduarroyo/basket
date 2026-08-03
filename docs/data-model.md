@@ -147,7 +147,11 @@ Sustituye a un "Jugador" como entidad fuerte, por la decisión de no tratar dato
 
 Invariante de aplicación (no expresable como constraint simple de BD): un equipo no puede aparecer dos veces en la misma jornada, ni como local ni como visitante.
 
-Cuando `Estado = Resuelto`, el marcador técnico que se propone por defecto en `PuntosLocal`/`PuntosVisitante` (editable por el administrador) es **2-0** a favor de `EquipoGanadorResolucionId`, según el Reglamento General y de Competiciones de la F.A.B. (confirmado para varios supuestos de partido no completado — Art. 80, 148, 149.2 — no 20-0 como se apuntó tentativamente antes de consultar la normativa). Para incomparecencia no justificada y alineación indebida **con mala fe o negligencia**, el Reglamento Disciplinario de la F.A.B. (Art. 43) confirma el mismo tratamiento de pérdida del encuentro, con una salvedad importante que este modelo **todavía no soporta**: añade además un descuento de 1 punto en la clasificación, algo que no existe en ningún otro supuesto (Art. 80 dice expresamente lo contrario) y para lo que no hay ningún campo en `Competicion`/`Jornada`/`Partido`. La alineación indebida **sin mala fe ni negligencia** no lleva marcador técnico en absoluto: se anula el encuentro y se repite (Art. 44) — un caso que tampoco está representado hoy (el `Estado = Resuelto` con `MotivoResolucion = AlineacionIndebida` asume implícitamente que hay un ganador, cuando este supuesto no lo tiene). Ver detalle completo en [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md#4-marcador-técnico-y-resultados-administrativos-fab).
+Cuando `Estado = Resuelto`, el marcador técnico que se propone por defecto en `PuntosLocal`/`PuntosVisitante` (editable por el administrador) es **2-0** a favor de `EquipoGanadorResolucionId`, según el Reglamento General y de Competiciones de la F.A.B. (confirmado para varios supuestos de partido no completado — Art. 80, 148, 149.2 — no 20-0 como se apuntó tentativamente antes de consultar la normativa). Para incomparecencia no justificada y alineación indebida **con mala fe o negligencia**, el Reglamento Disciplinario de la F.A.B. (Art. 43) confirma el mismo tratamiento de pérdida del encuentro, más un descuento de 1 punto en la clasificación que sí existe explícitamente para este caso (a diferencia del Art. 80, que lo excluye) — se registra dando de alta una `PenalizacionClasificacion` para el equipo infractor, ver más abajo. En este caso `MotivoResolucion = AlineacionIndebida` implica siempre mala fe o negligencia (Art. 43.F), porque el otro supuesto nunca llega a `Estado = Resuelto`:
+
+La alineación indebida **sin mala fe ni negligencia** (Art. 44) no lleva marcador técnico en absoluto — se anula el encuentro y se repite sin ese jugador. Se registra devolviendo el partido a `Estado = Programado` o `Aplazado` (según si ya hay nueva fecha) y dejando constancia de lo ocurrido en `Observaciones` (texto libre) — deliberadamente sin una segunda fila de `Partido` ni un valor de `MotivoResolucion` dedicado, para no complicar el modelo con la pregunta de cómo mostrar y relacionar dos partidos para el mismo enfrentamiento.
+
+Ver detalle completo en [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md#4-marcador-técnico-y-resultados-administrativos-fab).
 
 ### PartidoParcial
 
@@ -165,9 +169,25 @@ Se modela como tabla hija en vez de columnas fijas Q1-Q4 para no forzar el núme
 
 ## Clasificación
 
+### PenalizacionClasificacion
+
+Registro manual de una penalización de puntos de clasificación impuesta a un equipo por expediente disciplinario (p. ej. incomparecencia o alineación indebida con mala fe — Art. 43 del Reglamento Disciplinario de la F.A.B., ver [`reglamento/resumen-reglas-relevantes.md`](./reglamento/resumen-reglas-relevantes.md#4-marcador-técnico-y-resultados-administrativos-fab)). Es un ajuste independiente del resultado de cualquier partido concreto.
+
+| Campo | Tipo | Notas |
+| --- | --- | --- |
+| Id | int (PK) | |
+| EquipoId | FK → Equipo | |
+| Puntos | int | Negativo para un descuento, ej. -1 |
+| Motivo | string | Texto libre, ej. referencia al expediente/artículo |
+| PartidoId | FK → Partido (nullable) | Partido que originó la sanción, si aplica |
+| FechaAplicacion | date | |
+
+- No lleva `CompeticionId` propio: se obtiene a través de `EquipoId` (cada `Equipo` ya pertenece a una única `Competicion`).
+- Se introduce en el modelo ahora porque el Reglamento Disciplinario lo exige, pero su implementación (pantalla de alta, aplicación al cálculo) es de las últimas piezas previstas — no bloquea el resto del desarrollo.
+
 ### Clasificación de una competición (calculada, sin tabla propia)
 
-No existe una tabla `ClasificacionEquipo`: la clasificación se calcula al vuelo agregando `Partido` (estado `Jugado` o `Resuelto`) por `EquipoId` dentro de una `CompeticionId`, restringido a las jornadas con `CuentaParaClasificacion = true` (excluye fases finales de copa/playoff, ver `Jornada` más arriba), sin persistir el resultado. El detalle de esta decisión, los criterios de desempate y la alternativa descartada están en [[architecture#14. Clasificación como consulta calculada|architecture.md, punto 14]].
+No existe una tabla `ClasificacionEquipo`: la clasificación se calcula al vuelo agregando `Partido` (estado `Jugado` o `Resuelto`) por `EquipoId` dentro de una `CompeticionId`, restringido a las jornadas con `CuentaParaClasificacion = true` (excluye fases finales de copa/playoff, ver `Jornada` más arriba), y restando las `PenalizacionClasificacion` vigentes de cada equipo, sin persistir el resultado. El detalle de esta decisión, los criterios de desempate y la alternativa descartada están en [[architecture#14. Clasificación como consulta calculada|architecture.md, punto 14]].
 
 Campos que produce el cálculo, por equipo:
 
@@ -179,7 +199,7 @@ Campos que produce el cálculo, por equipo:
 | Derrotas | int | |
 | PuntosFavor | int | |
 | PuntosContra | int | |
-| PuntosClasificacion | int | Calculado con `PuntosVictoria`/`PuntosDerrota` de la Competicion |
+| PuntosClasificacion | int | `PuntosVictoria`/`PuntosDerrota` de la Competicion, sumados por partido, más la suma de `PenalizacionClasificacion.Puntos` del equipo |
 
 Se modela como cálculo derivado (no como tabla) porque el requisito no funcional de consistencia eventual (máximo 5 minutos) permite servirlo desde caché de lectura (Output Caching) en vez de mantener un estado persistido, y `CompeticionId` sirve como partición natural tanto de la consulta como de esa caché para cumplir el límite de 200ms.
 

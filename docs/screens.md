@@ -43,8 +43,11 @@ Pantallas de solo lectura, candidatas directas a Output Caching.
 | Calendario (planificación) | Crear jornadas, programar partidos (equipos, fecha/hora, sede) | Jornada, Partido |
 | Resultados | Introducir marcador y parciales, o cambiar estado (aplazado/cancelado/resuelto + motivo + ganador) | Partido, PartidoParcial |
 | Clasificación | Vista de verificación del cálculo (misma consulta que la pública, sin caché) | Partido (calculada) |
+| Penalizaciones de clasificación | Alta de una penalización de puntos a un equipo, con motivo y partido vinculado opcional | PenalizacionClasificacion |
 
 `Calendario` y `Resultados` se mantienen como dos pantallas separadas aunque compartan la entidad `Partido`, porque el documento funcional las trata como dos funciones distintas (planificación vs. resultado).
+
+`Penalizaciones de clasificación` es de las últimas pantallas previstas para implementarse — ver [[architecture#14. Clasificación como consulta calculada|architecture.md, punto 14]], nota de secuenciación.
 
 ### Sistema
 
@@ -57,5 +60,5 @@ Pantallas de solo lectura, candidatas directas a Output Caching.
 ## Resumen
 
 - 11 pantallas públicas
-- 13 pantallas admin (10 de v1 + login, y 2 placeholders: importación/exportación y usuarios/roles)
-- Total: ~24 pantallas, todas mapeadas 1:1 al modelo de datos para facilitar el scaffolding de Razor Pages.
+- 14 pantallas admin (11 de v1 + login, y 2 placeholders: importación/exportación y usuarios/roles)
+- Total: ~25 pantallas, todas mapeadas 1:1 al modelo de datos para facilitar el scaffolding de Razor Pages.
