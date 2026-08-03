@@ -1,6 +1,10 @@
+using BasketBaseTracker.Web.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
+
+builder.AddSqlServerDbContext<ApplicationDbContext>("basketbasetracker");
 
 // Add services to the container.
 builder.Services.AddRazorPages(options =>
