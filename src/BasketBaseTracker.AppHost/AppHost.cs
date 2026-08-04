@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
+builder.AddAzureContainerAppEnvironment("aca-env");
+
 var sql = builder.AddSqlServer("sql");
 if (!builder.Configuration.GetValue<bool>("Sql:Ephemeral"))
 {
@@ -15,6 +17,7 @@ if (!builder.Configuration.GetValue<bool>("Sql:Ephemeral"))
 var db = sql.AddDatabase("basketbasetracker");
 
 builder.AddProject<Projects.BasketBaseTracker_Web>("web")
+    .WithExternalHttpEndpoints()
     .WithReference(db)
     .WaitFor(db);
 
