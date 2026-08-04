@@ -26,6 +26,6 @@ tags:
 - [x] Verificar `aspire run`: `AppHost`, `Web` y la base de datos local levantan sin errores.
 - [x] Verificar `dotnet test`: todos los tests (`Tests` y `Tests.E2E`) pasan.
 - [x] Verificar manualmente: el seed crea el primer admin, y ese admin puede iniciar sesión y acceder al Area `Admin`.
-- [ ] Crear `.github/workflows/ci.yml` (build + test en push/PR contra `develop`).
+- [x] Crear `.github/workflows/ci.yml` (build + test en push/PR contra `develop`).
 - [ ] Verificar que el workflow se dispara y pasa en el PR de este incremento.
 - [ ] Revisar la Definición de Hecho (`workflow.md`) antes de abrir el PR a `develop`.

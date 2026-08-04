@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar
+        run: dotnet build --no-restore
+
+      # Solo unitarios e integración (architecture.md punto 13 y 15) — el smoke E2E
+      # con Playwright de Tests.E2E se ejecuta únicamente en el workflow de despliegue
+      # a producción, antes de promocionar la imagen (BAS-3).
+      - name: Ejecutar tests unitarios e integración
+        run: dotnet test tests/BasketBaseTracker.Tests --no-build
