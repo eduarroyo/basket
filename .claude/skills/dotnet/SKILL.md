@@ -28,13 +28,16 @@ dotnet clean          # limpia bin/ y obj/ del proyecto o solución actual — n
 dotnet format         # aplica el estilo de código por defecto (.editorconfig si existe)
 ```
 
-**`dotnet test` a nivel de solución exige `--max-parallel-test-modules 1`**: `Tests` (Integration) y `Tests.E2E` levantan cada uno su propia instancia del `AppHost` (`Aspire.Hosting.Testing`, ver punto 15 de `architecture.md`), y ese `AppHost` fija el contenedor de SQL Server a un puerto de host fijo (`WithHostPort(1433)`) y un volumen de datos persistente (`WithDataVolume()`) — a propósito, para poder conectarse desde herramientas externas en local con una cadena de conexión estable. Microsoft Testing Platform ejecuta los módulos de test de la solución en paralelo por defecto, así que sin esa opción ambos proyectos intentan arrancar su propio contenedor `sql` a la vez, chocan por el puerto/volumen compartido, y el que pierde la carrera falla con `Another instance of the application is already running` dentro del contenedor:
+**`Tests` (Integration) y `Tests.E2E` arrancan SQL Server en modo efímero, no el de desarrollo**: ambos levantan su propia instancia del `AppHost` (`Aspire.Hosting.Testing`, ver punto 15 de `architecture.md`), reutilizando literalmente `AppHost.cs`. Por defecto ese `AppHost` fija el contenedor de SQL Server a un puerto de host fijo (`WithHostPort(1433)`) y un volumen de datos persistente (`WithDataVolume()`) — a propósito, para que `aspire run`/`aspire start` en desarrollo local tengan una cadena de conexión estable entre reinicios. Si los tests reutilizaran ese mismo puerto/volumen: (a) Microsoft Testing Platform ejecuta los módulos de test de la solución en paralelo por defecto, así que dos `AppHost` (`Tests` y `Tests.E2E`) competirían por el mismo puerto/volumen y el que pierde la carrera falla con `Another instance of the application is already running`; y (b) el *seed* del primer administrador (`IdentitySeeder`, idempotente) no crearía el admin de prueba de cada test porque ya existiría el de una ejecución anterior (de otro test o de `aspire run` real) en ese mismo volumen persistente.
 
-```bash
-dotnet test --max-parallel-test-modules 1
+Por eso `AppHost.cs` expone un interruptor de configuración (`Sql:Ephemeral`) que los tests activan pasándolo como argumento a `DistributedApplicationTestingBuilder.CreateAsync`, para que el contenedor de SQL Server arranque con puerto aleatorio y sin volumen (datos descartados al terminar el test, aislados de la base de datos de desarrollo local y de cualquier otro test):
+
+```csharp
+var appHost = await DistributedApplicationTestingBuilder
+    .CreateAsync<Projects.BasketBaseTracker_AppHost>(["--Sql:Ephemeral=true"], cancellationToken);
 ```
 
-No hace falta si se ejecuta un solo proyecto de test a la vez (`dotnet test tests/BasketBaseTracker.Tests` o `dotnet test tests/BasketBaseTracker.Tests.E2E` por separado) — ahí no hay dos `AppHost` compitiendo.
+Con esto, `dotnet test` a nivel de solución no necesita ninguna opción especial de paralelismo — cada `AppHost` de test tiene su propio contenedor aislado.
 
 ## Desarrollo local
 
