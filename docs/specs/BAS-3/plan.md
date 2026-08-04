@@ -26,5 +26,5 @@ Ninguna nueva. La Portada y `Login`/`Logout` de `BAS-2` pasan a ser accesibles t
 
 ## Riesgos y dependencias externas
 
-- **Bloqueante de partida**: no hay ninguna suscripción de Azure accesible desde esta máquina a fecha de la propuesta (`az login` → `No subscriptions found`). Nada de este plan se puede ejecutar de verdad hasta resolverlo — ver `tasks.md`.
+- **Bloqueante de partida — resuelto**: no había ninguna suscripción de Azure accesible desde esta máquina a fecha de la propuesta (`az login` → `No subscriptions found`); ya hay una suscripción activa (`basic`, `ce358a47-4bfd-46cb-b4cf-d54e092d08b9`). `azd` sigue sin instalar — solo hace falta si `aspire deploy` no cubre algo del plan (ver decisión de herramienta de despliegue más arriba).
 - Aspire es un framework joven (`architecture.md` punto 11): varias decisiones de este plan (`aspire deploy` vs `azd`, soporte de GHCR) dependen de comprobar el comportamiento exacto de la versión instalada en el momento de implementar, no se dan por sentadas de antemano.

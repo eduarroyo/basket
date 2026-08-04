@@ -7,7 +7,7 @@ tags:
 
 # BAS-3: Tareas
 
-- [ ] **Bloqueante**: conseguir acceso a una suscripción de Azure desde esta máquina (`az login` / `azd auth login` funcionando, `az account show` devuelve una suscripción válida).
+- [x] **Bloqueante**: conseguir acceso a una suscripción de Azure desde esta máquina (`az login` funcionando, `az account show` devuelve una suscripción válida — suscripción `basic`, `ce358a47-4bfd-46cb-b4cf-d54e092d08b9`).
 - [ ] Instalar la Aspire CLI más reciente si hace falta y comprobar `aspire --version`/`aspire doctor` antes de empezar (skill `aspire`, "Aspire evoluciona rápido").
 - [ ] Ejecutar `aspire add azure-appcontainers` en el `AppHost` y configurar `builder.AddAzureContainerAppEnvironment(...)`.
 - [ ] Exponer `Web` públicamente (`WithExternalHttpEndpoints()`) referenciando el entorno de Container Apps.

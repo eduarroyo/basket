@@ -49,7 +49,7 @@ Llevar el esqueleto de BAS-2 a un entorno real de producción en Azure: generar 
 ## Aclaraciones
 
 - **¿BAS-3 incluye Cloudflare?** → No. Se decidió partir en dos incrementos más pequeños y verificables: `BAS-3` deja la app accesible en la URL de Container Apps; Cloudflare se añade en `BAS-4` una vez haya un dominio listo.
-- **¿Hace falta una suscripción de Azure activa para completar este incremento?** → Sí. A fecha de esta propuesta no hay ninguna accesible (`az login` falla con `No subscriptions found for eduarroyo@outlook.com`, y los tenants alternativos exigen MFA no completado). Queda como tarea bloqueante explícita en `tasks.md`; la redacción de `spec.md`/`plan.md`/`tasks.md` no depende de tenerla resuelta todavía.
+- **¿Hace falta una suscripción de Azure activa para completar este incremento?** → Sí. En el momento de la propuesta no había ninguna accesible (`az login` fallaba con `No subscriptions found for eduarroyo@outlook.com`); **resuelto** — `az login` ya funciona y hay una suscripción activa (`basic`, `ce358a47-4bfd-46cb-b4cf-d54e092d08b9`, tenant `992cb75b-2b82-4bfe-8df3-20b01901b214`). `azd` todavía no está instalado en esta máquina, pero el plan empieza por `aspire deploy` nativo (ver `plan.md`), que no lo requiere de entrada.
 
 ## Referencias
 
