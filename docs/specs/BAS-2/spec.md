@@ -36,12 +36,12 @@ Montar el esqueleto de la solución sobre el que se construirán todos los incre
 
 ## Criterios de aceptación
 
-- [ ] `aspire run` levanta `AppHost`, `Web` y el recurso de base de datos local sin errores.
-- [ ] Existe una migración de EF Core aplicada que crea el esquema de ASP.NET Core Identity.
-- [ ] Si no existe ningún administrador, el *seed* idempotente crea uno a partir de un secreto local; ese administrador puede iniciar sesión en la pantalla `Login` y acceder al Area `Admin`.
-- [ ] Un usuario anónimo puede acceder a la Portada (`/`) sin autenticarse.
-- [ ] `dotnet test` ejecuta los proyectos `Tests` y `Tests.E2E` y todos los tests pasan.
-- [ ] Un workflow de GitHub Actions ejecuta build + test en cada push/PR contra `develop` y bloquea el merge si falla.
+- [x] `aspire run` levanta `AppHost`, `Web` y el recurso de base de datos local sin errores.
+- [x] Existe una migración de EF Core aplicada que crea el esquema de ASP.NET Core Identity.
+- [x] Si no existe ningún administrador, el *seed* idempotente crea uno a partir de un secreto local; ese administrador puede iniciar sesión en la pantalla `Login` y acceder al Area `Admin`.
+- [x] Un usuario anónimo puede acceder a la Portada (`/`) sin autenticarse.
+- [x] `dotnet test` ejecuta los proyectos `Tests` y `Tests.E2E` y todos los tests pasan.
+- [ ] Un workflow de GitHub Actions ejecuta build + test en cada push/PR contra `develop` y bloquea el merge si falla. — el workflow existe y pasa (PR #3), pero `develop` no tiene ninguna regla de protección de rama todavía: GitHub permitiría fusionar aunque el check estuviera en rojo. Pendiente de decisión (ver `## Aclaraciones`).
 
 ## Aclaraciones
 
