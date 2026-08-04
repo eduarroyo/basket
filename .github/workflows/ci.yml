@@ -24,6 +24,14 @@ jobs:
       - name: Compilar
         run: dotnet build --no-restore
 
+      # El test de integración llama a Web por HTTPS con el certificado de desarrollo
+      # de Kestrel; sin confiar en él aquí, la validación de la cadena de certificados
+      # falla con UntrustedRoot en el runner. Soportado en Linux desde el SDK de .NET 9
+      # (global.json fija una versión posterior) — ver "Enforce HTTPS in ASP.NET Core"
+      # en Microsoft Learn, sección "Linux-specific considerations".
+      - name: Confiar en el certificado HTTPS de desarrollo
+        run: dotnet dev-certs https --trust
+
       # Solo unitarios e integración (architecture.md punto 13 y 15) — el smoke E2E
       # con Playwright de Tests.E2E se ejecuta únicamente en el workflow de despliegue
       # a producción, antes de promocionar la imagen (BAS-3).
