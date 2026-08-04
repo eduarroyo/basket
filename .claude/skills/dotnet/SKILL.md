@@ -28,6 +28,14 @@ dotnet clean          # limpia bin/ y obj/ del proyecto o solución actual — n
 dotnet format         # aplica el estilo de código por defecto (.editorconfig si existe)
 ```
 
+**`dotnet test` a nivel de solución exige `--max-parallel-test-modules 1`**: `Tests` (Integration) y `Tests.E2E` levantan cada uno su propia instancia del `AppHost` (`Aspire.Hosting.Testing`, ver punto 15 de `architecture.md`), y ese `AppHost` fija el contenedor de SQL Server a un puerto de host fijo (`WithHostPort(1433)`) y un volumen de datos persistente (`WithDataVolume()`) — a propósito, para poder conectarse desde herramientas externas en local con una cadena de conexión estable. Microsoft Testing Platform ejecuta los módulos de test de la solución en paralelo por defecto, así que sin esa opción ambos proyectos intentan arrancar su propio contenedor `sql` a la vez, chocan por el puerto/volumen compartido, y el que pierde la carrera falla con `Another instance of the application is already running` dentro del contenedor:
+
+```bash
+dotnet test --max-parallel-test-modules 1
+```
+
+No hace falta si se ejecuta un solo proyecto de test a la vez (`dotnet test tests/BasketBaseTracker.Tests` o `dotnet test tests/BasketBaseTracker.Tests.E2E` por separado) — ahí no hay dos `AppHost` compitiendo.
+
 ## Desarrollo local
 
 ```bash
