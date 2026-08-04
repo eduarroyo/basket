@@ -28,4 +28,4 @@ tags:
 - [x] Verificar manualmente: el seed crea el primer admin, y ese admin puede iniciar sesión y acceder al Area `Admin`.
 - [x] Crear `.github/workflows/ci.yml` (build + test en push/PR contra `develop`).
 - [x] Verificar que el workflow se dispara y pasa en el PR de este incremento.
-- [ ] Revisar la Definición de Hecho (`workflow.md`) antes de abrir el PR a `develop`.
+- [x] Revisar la Definición de Hecho (`workflow.md`) antes de abrir el PR a `develop`.
