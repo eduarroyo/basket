@@ -6,16 +6,11 @@ namespace BasketBaseTracker.Web.Areas.Admin.Pages;
 
 public class LogoutModel(SignInManager<IdentityUser> signInManager, ILogger<LogoutModel> logger) : PageModel
 {
-    public async Task<IActionResult> OnPost(string? returnUrl = null)
+    public async Task<IActionResult> OnPost()
     {
         await signInManager.SignOutAsync();
         logger.LogInformation("El usuario ha cerrado sesión.");
 
-        if (returnUrl != null)
-        {
-            return LocalRedirect(returnUrl);
-        }
-
-        return RedirectToPage();
+        return LocalRedirect(Url.Content("~/"));
     }
 }

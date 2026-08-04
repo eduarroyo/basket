@@ -32,7 +32,11 @@ public class LoginTests(WebAppFixture fixture)
         await page.GotoAsync(new Uri(fixture.WebUrl, "/Admin/Logout").ToString());
         await Assertions.Expect(page.GetByRole(AriaRole.Button, new() { Name = "Cerrar sesión" })).ToBeVisibleAsync();
 
+        // Tras cerrar sesión, vuelve a la Portada (Logout.cshtml.cs).
         await page.ClickAsync("button:has-text('Cerrar sesión')");
+        await Assertions.Expect(page.GetByRole(AriaRole.Heading, new() { Name = "BasketBaseTracker" })).ToBeVisibleAsync();
+
+        await page.GotoAsync(new Uri(fixture.WebUrl, "/Admin/Logout").ToString());
         await Assertions.Expect(page.GetByText("Has cerrado sesión correctamente")).ToBeVisibleAsync();
     }
 }
