@@ -65,6 +65,23 @@ Para investigar por qué una versión concreta de un paquete transitivo entra en
 dotnet nuget why src/BasketBaseTracker.AppHost/BasketBaseTracker.AppHost.csproj MessagePack
 ```
 
+Si esa investigación revela que la versión mínima resuelta de una dependencia transitiva tiene una vulnerabilidad conocida (warning `NU1901`-`NU1904` al compilar, con enlace a un GHSA), fijar la versión mínima no vulnerable explícitamente en `Directory.Packages.props`, en vez de ignorar el warning o esperar a que el paquete raíz suba su propia versión mínima:
+
+```xml
+<PropertyGroup>
+  <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+</PropertyGroup>
+<ItemGroup>
+  <!-- Transitive dependencies versions forced to avoid vulnerabilities. -->
+  <PackageVersion Include="NuGet.Packaging" Version="6.12.5" />
+  <PackageVersion Include="NuGet.ProjectModel" Version="6.12.5" />
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+</ItemGroup>
+```
+
+`CentralPackageTransitivePinningEnabled` hace que cualquier `PackageVersion` de `Directory.Packages.props` que coincida con una dependencia *transitiva* (no solo las referenciadas directamente en un `.csproj`) sobrescriba la versión mínima que traería el paquete raíz — así se puede subir solo la dependencia vulnerable a la primera versión que ya no lo es, sin depender de que el paquete que la arrastra (p. ej. `Microsoft.VisualStudio.Web.CodeGeneration.Design`) publique una nueva versión. Referencia: [Central Package Management — Transitive pinning (Microsoft Learn)](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management#transitive-pinning).
+
 ## Propiedades MSBuild compartidas (Directory.Build.props)
 
 `Directory.Build.props` (raíz del repo, generado con `dotnet new buildprops`) centraliza `TargetFramework`, `ImplicitUsings` y `Nullable` para todos los proyectos — no repetirlas en un `.csproj` nuevo, solo las propiedades específicas de ese proyecto (`OutputType`, `UserSecretsId`, etc.). Si un proyecto nuevo necesitara un valor distinto para alguna de estas tres, se sobrescribe en su propio `.csproj` (el `PropertyGroup` del proyecto gana sobre `Directory.Build.props`).
