@@ -1,0 +1,51 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Elementos de la solución/">
+    <File Path=".gitignore" />
+    <File Path="aspire.config.json" />
+    <File Path="CLAUDE.md" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="global.json" />
+    <File Path="README.md" />
+  </Folder>
+
+  <Folder Name="/docs/">
+    <File Path="docs/architecture.md" />
+    <File Path="docs/data-model.md" />
+    <File Path="docs/functional.md" />
+    <File Path="docs/screens.md" />
+    <File Path="docs/workflow.md" />
+  </Folder>
+  <Folder Name="/docs/reglamento/">
+    <File Path="docs/reglamento/DISCIPLINARIO-FAB.pdf" />
+    <File Path="docs/reglamento/resumen-reglas-relevantes.md" />
+    <File Path="docs/reglamento/Reglas_Oficiales_de_Baloncesto_FIBA_2022_V2.pdf" />
+    <File Path="docs/reglamento/RGyC-FAB.pdf" />
+  </Folder>
+  <Folder Name="/docs/specs/" />
+  <Folder Name="/docs/specs/archive/" />
+  <Folder Name="/docs/specs/archive/BAS-1/">
+    <File Path="docs/specs/archive/BAS-1/spec.md" />
+    <File Path="docs/specs/archive/BAS-1/plan.md" />
+    <File Path="docs/specs/archive/BAS-1/tasks.md" />
+  </Folder>
+  <Folder Name="/docs/specs/archive/BAS-2/">
+    <File Path="docs/specs/archive/BAS-2/spec.md" />
+    <File Path="docs/specs/archive/BAS-2/plan.md" />
+    <File Path="docs/specs/archive/BAS-2/tasks.md" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BasketBaseTracker.Tests/BasketBaseTracker.Tests.csproj" />
+    <Project Path="tests/BasketBaseTracker.Tests.E2E/BasketBaseTracker.Tests.E2E.csproj" />
+  </Folder>
+
+  <Project Path="src/BasketBaseTracker.AppHost/BasketBaseTracker.AppHost.csproj" />
+  <Project Path="src/BasketBaseTracker.ServiceDefaults/BasketBaseTracker.ServiceDefaults.csproj" />
+  <Project Path="src/BasketBaseTracker.Web/BasketBaseTracker.Web.csproj" />
+
+</Solution>

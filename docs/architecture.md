@@ -239,6 +239,9 @@ Relacionado con el punto 7 (Autenticación y autorización). `functional.md` apu
 ## Estructura de la solución
 
 ```
+BasketBaseTracker.slnx                  # Formato de solución .slnx (no el .sln clásico)
+Directory.Build.props                   # Propiedades MSBuild compartidas (TargetFramework, Nullable, ImplicitUsings)
+Directory.Packages.props                # Versiones de paquetes NuGet centralizadas (Central Package Management)
 src/BasketBaseTracker.AppHost/          # Orquestación Aspire: dev local + modelo de despliegue azd
 src/BasketBaseTracker.ServiceDefaults/  # OpenTelemetry, health checks, resiliencia compartidos
 src/BasketBaseTracker.Web/              # Razor Pages, Areas Public/Admin, EF Core, servicios

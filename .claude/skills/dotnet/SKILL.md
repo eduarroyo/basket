@@ -17,14 +17,87 @@ tests/BasketBaseTracker.Tests/          # Unitarios (Unit/) e integración (Inte
 tests/BasketBaseTracker.Tests.E2E/      # Smoke E2E con Playwright
 ```
 
-`AppHost` y `ServiceDefaults` se crean con la CLI de Aspire (ver skill `aspire`), no con `dotnet new` directamente.
+`AppHost` y `ServiceDefaults` se crean con la plantilla `dotnet new aspire` (ver skill `aspire` — `aspire new` no expone esa plantilla como subcomando en la versión instalada de la CLI, hay que usar `dotnet new` directamente).
 
-## Build y tests
+## Build, tests y limpieza
 
 ```bash
 dotnet build
 dotnet test
+dotnet clean          # limpia bin/ y obj/ del proyecto o solución actual — nunca borrarlas a mano con rm -rf
+dotnet format         # aplica el estilo de código por defecto (.editorconfig si existe)
 ```
+
+**`Tests` (Integration) y `Tests.E2E` arrancan SQL Server en modo efímero, no el de desarrollo**: ambos levantan su propia instancia del `AppHost` (`Aspire.Hosting.Testing`, ver punto 15 de `architecture.md`), reutilizando literalmente `AppHost.cs`. Por defecto ese `AppHost` fija el contenedor de SQL Server a un puerto de host fijo (`WithHostPort(1433)`) y un volumen de datos persistente (`WithDataVolume()`) — a propósito, para que `aspire run`/`aspire start` en desarrollo local tengan una cadena de conexión estable entre reinicios. Si los tests reutilizaran ese mismo puerto/volumen: (a) Microsoft Testing Platform ejecuta los módulos de test de la solución en paralelo por defecto, así que dos `AppHost` (`Tests` y `Tests.E2E`) competirían por el mismo puerto/volumen y el que pierde la carrera falla con `Another instance of the application is already running`; y (b) el *seed* del primer administrador (`IdentitySeeder`, idempotente) no crearía el admin de prueba de cada test porque ya existiría el de una ejecución anterior (de otro test o de `aspire run` real) en ese mismo volumen persistente.
+
+Por eso `AppHost.cs` expone un interruptor de configuración (`Sql:Ephemeral`) que los tests activan pasándolo como argumento a `DistributedApplicationTestingBuilder.CreateAsync`, para que el contenedor de SQL Server arranque con puerto aleatorio y sin volumen (datos descartados al terminar el test, aislados de la base de datos de desarrollo local y de cualquier otro test):
+
+```csharp
+var appHost = await DistributedApplicationTestingBuilder
+    .CreateAsync<Projects.BasketBaseTracker_AppHost>(["--Sql:Ephemeral=true"], cancellationToken);
+```
+
+Con esto, `dotnet test` a nivel de solución no necesita ninguna opción especial de paralelismo — cada `AppHost` de test tiene su propio contenedor aislado.
+
+## Desarrollo local
+
+```bash
+dotnet watch --project src/BasketBaseTracker.Web     # recarga en caliente al editar Web
+dotnet dev-certs https --trust                        # certificado HTTPS de desarrollo, una vez por máquina
+```
+
+Secretos de usuario en local (p. ej. credenciales del *seed* del primer administrador, `architecture.md` punto 7 — nunca en `appsettings.json`):
+
+```bash
+dotnet user-secrets init --project src/BasketBaseTracker.Web
+dotnet user-secrets set "Seed:AdminEmail" "admin@example.com" --project src/BasketBaseTracker.Web
+dotnet user-secrets list --project src/BasketBaseTracker.Web
+```
+
+## Gestión centralizada de paquetes (Central Package Management)
+
+Habilitado desde `BAS-2`: las versiones de los paquetes NuGet viven en `Directory.Packages.props` (raíz del repo), no en cada `.csproj`. Se generó con la propia CLI:
+
+```bash
+dotnet new packagesprops
+```
+
+Al añadir un paquete nuevo a cualquier proyecto, usar `dotnet add package` como siempre — el SDK de .NET detecta `ManagePackageVersionsCentrally=true` y escribe la versión en `Directory.Packages.props` automáticamente, dejando en el `.csproj` solo `<PackageReference Include="..." />` sin versión:
+
+```bash
+dotnet add src/BasketBaseTracker.Web package Microsoft.EntityFrameworkCore.SqlServer
+```
+
+Nunca añadir un paquete escribiendo `<PackageReference Include="..." Version="..." />` a mano en un `.csproj` — rompe la gestión centralizada. Referencia: [Central Package Management (Microsoft Learn)](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management).
+
+Para investigar por qué una versión concreta de un paquete transitivo entra en el árbol de dependencias (p. ej. ante un aviso de seguridad NU1902/NU1903 como el de `MessagePack` al crear el AppHost), usar `dotnet nuget why` en vez de deducirlo a mano:
+
+```bash
+dotnet nuget why src/BasketBaseTracker.AppHost/BasketBaseTracker.AppHost.csproj MessagePack
+```
+
+Si esa investigación revela que la versión mínima resuelta de una dependencia transitiva tiene una vulnerabilidad conocida (warning `NU1901`-`NU1904` al compilar, con enlace a un GHSA), fijar la versión mínima no vulnerable explícitamente en `Directory.Packages.props`, en vez de ignorar el warning o esperar a que el paquete raíz suba su propia versión mínima:
+
+```xml
+<PropertyGroup>
+  <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+</PropertyGroup>
+<ItemGroup>
+  <!-- Transitive dependencies versions forced to avoid vulnerabilities. -->
+  <PackageVersion Include="NuGet.Packaging" Version="6.12.5" />
+  <PackageVersion Include="NuGet.ProjectModel" Version="6.12.5" />
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+</ItemGroup>
+```
+
+`CentralPackageTransitivePinningEnabled` hace que cualquier `PackageVersion` de `Directory.Packages.props` que coincida con una dependencia *transitiva* (no solo las referenciadas directamente en un `.csproj`) sobrescriba la versión mínima que traería el paquete raíz — así se puede subir solo la dependencia vulnerable a la primera versión que ya no lo es, sin depender de que el paquete que la arrastra (p. ej. `Microsoft.VisualStudio.Web.CodeGeneration.Design`) publique una nueva versión. Referencia: [Central Package Management — Transitive pinning (Microsoft Learn)](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management#transitive-pinning).
+
+## Propiedades MSBuild compartidas (Directory.Build.props)
+
+`Directory.Build.props` (raíz del repo, generado con `dotnet new buildprops`) centraliza `TargetFramework`, `ImplicitUsings` y `Nullable` para todos los proyectos — no repetirlas en un `.csproj` nuevo, solo las propiedades específicas de ese proyecto (`OutputType`, `UserSecretsId`, etc.). Si un proyecto nuevo necesitara un valor distinto para alguna de estas tres, se sobrescribe en su propio `.csproj` (el `PropertyGroup` del proyecto gana sobre `Directory.Build.props`).
+
+No se usa `Directory.Build.targets` ni `Directory.Solution.props`/`.targets` — no hay todavía un caso de uso real que los justifique (ver `docs/architecture.md`, estructura de la solución).
 
 ## Crear el proyecto Web (Razor Pages)
 
@@ -55,25 +128,41 @@ dotnet new xunit3 -n BasketBaseTracker.Tests.E2E -o tests/BasketBaseTracker.Test
 dotnet add tests/BasketBaseTracker.Tests.E2E package Microsoft.Playwright
 ```
 
-## EF Core
+## Herramientas .NET (manifiesto local, no `--global`)
 
-Instalar la herramienta si no está disponible:
+Las herramientas CLI del proyecto (`dotnet-ef`, `dotnet-aspnet-codegenerator`) se instalan en un manifiesto local versionado en el repo, no con `--global` — así el workflow de CI (`architecture.md` punto 13) y cualquier máquina nueva instalan exactamente las mismas versiones con `dotnet tool restore`, sin depender de qué tenga instalado global el entorno:
 
 ```bash
-dotnet tool install --global dotnet-ef
+dotnet new tool-manifest                              # una sola vez, crea .config/dotnet-tools.json
+dotnet tool install dotnet-ef
+dotnet tool install dotnet-aspnet-codegenerator
+dotnet tool restore                                   # en CI o en una máquina nueva, tras clonar el repo
 ```
+
+Con manifiesto local, cada comando de la herramienta se invoca con `dotnet <herramienta>` igual que si fuera global (`dotnet tool restore` deja los shims listos).
+
+## EF Core
+
+Requiere el paquete `Microsoft.EntityFrameworkCore.Design` en el proyecto (`Web`), con `PrivateAssets="all"` (solo se usa en tiempo de diseño, no debe llegar al artefacto publicado).
 
 Migraciones:
 
 ```bash
 dotnet ef migrations add <Nombre> --project src/BasketBaseTracker.Web
-dotnet ef database update --project src/BasketBaseTracker.Web
 ```
+
+`dotnet ef migrations add` no necesita conexión real (solo el modelo). `dotnet ef database update` sí — y como `Program.cs` usa `AddSqlServerDbContext` (Aspire), la cadena de conexión solo se inyecta automáticamente cuando el proceso lo arranca el `AppHost`. Para aplicar una migración a mano fuera de `aspire run`, hay que pasarla explícitamente:
+
+```bash
+dotnet ef database update --project src/BasketBaseTracker.Web --connection "Server=127.0.0.1,<puerto>;Database=basketbasetracker;User Id=sa;Password=<...>;TrustServerCertificate=True;"
+```
+
+- Puerto y contraseña del contenedor local: `docker ps` (columna *Ports*) y `docker inspect <contenedor> --format '{{range .Config.Env}}{{println .}}{{end}}'` (variable `MSSQL_SA_PASSWORD`).
+- **Usar `127.0.0.1`, nunca `localhost`**, en la cadena de conexión: en Windows, `localhost` puede resolver primero a IPv6 (`::1`), y el puerto publicado por Docker Desktop normalmente solo escucha en IPv4 (`127.0.0.1:<puerto>->1433/tcp`) — con `localhost` la conexión falla por timeout (Error 258) aunque el contenedor esté sano; con `127.0.0.1` funciona a la primera.
 
 ## Scaffolding de CRUD (Razor Pages + EF Core)
 
 ```bash
-dotnet tool install -g dotnet-aspnet-codegenerator
 dotnet aspnet-codegenerator razorpage -m <Entidad> -dc <DbContext> -udl -outDir Areas/Admin/Pages/<Entidad> --referenceScriptLibraries
 ```
 
