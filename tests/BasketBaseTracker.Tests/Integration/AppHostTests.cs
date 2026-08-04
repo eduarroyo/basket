@@ -15,8 +15,11 @@ public class AppHostTests
     {
         var cancellationToken = TestContext.Current.CancellationToken;
 
+        // "Sql:Ephemeral" hace que el AppHost use un contenedor de SQL Server sin
+        // puerto fijo ni volumen persistente (AppHost.cs), para no compartir estado
+        // ni puerto con la base de datos de desarrollo local ni con otros tests.
         var appHost = await DistributedApplicationTestingBuilder
-            .CreateAsync<Projects.BasketBaseTracker_AppHost>(cancellationToken);
+            .CreateAsync<Projects.BasketBaseTracker_AppHost>(["--Sql:Ephemeral=true"], cancellationToken);
 
         appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
         {
