@@ -1,6 +1,6 @@
 ---
 codigo: BAS-2
-estado: Planificado
+estado: Archivado
 tags:
   - plan
 ---

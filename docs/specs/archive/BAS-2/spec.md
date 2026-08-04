@@ -1,7 +1,7 @@
 ---
 codigo: BAS-2
 titulo: Scaffolding de la solución
-estado: Planificado
+estado: Archivado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-03
 tags:
