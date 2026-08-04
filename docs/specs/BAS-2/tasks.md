@@ -23,7 +23,7 @@ tags:
 - [x] Crear la Portada mínima (`/`) en el Area `Public`, accesible sin autenticación.
 - [x] Crear `tests/BasketBaseTracker.Tests/` (xUnit v3 + `Aspire.Hosting.Testing`) con un test de integración que levante el `AppHost` y compruebe el health check de `Web`.
 - [x] Crear `tests/BasketBaseTracker.Tests.E2E/` (xUnit v3 + Playwright) con un test que navegue a la Portada sin autenticarse.
-- [ ] Verificar `aspire run`: `AppHost`, `Web` y la base de datos local levantan sin errores.
+- [x] Verificar `aspire run`: `AppHost`, `Web` y la base de datos local levantan sin errores.
 - [ ] Verificar `dotnet test`: todos los tests (`Tests` y `Tests.E2E`) pasan.
 - [ ] Verificar manualmente: el seed crea el primer admin, y ese admin puede iniciar sesión y acceder al Area `Admin`.
 - [ ] Crear `.github/workflows/ci.yml` (build + test en push/PR contra `develop`).
