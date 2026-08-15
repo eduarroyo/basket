@@ -133,7 +133,7 @@ flowchart LR
 **Justificación**: mantiene el compromiso de "solo infraestructura gratuita" del documento funcional — Azure Container Registry tiene un coste fijo (~5$/mes) que GHCR evita.
 
 **Riesgos a vigilar**:
-- La API `AddContainerRegistry`/`WithContainerRegistry` es experimental en Aspire (diagnóstico `ASPIRECOMPUTE003`), puede cambiar en futuras versiones.
+- La API `AddContainerRegistry`/`WithContainerRegistry` es experimental en Aspire (diagnóstico `ASPIRECOMPUTE003`, hay que suprimirlo explícitamente para compilar), puede cambiar en futuras versiones. Validado que sigue disponible en Aspire 13.4.6 (`BAS-3`).
 - A diferencia de ACR, la autenticación contra GHCR no está integrada automáticamente con Container Apps: hay que gestionar las credenciales manualmente (`docker login` en local, secreto en GitHub Actions para CI/CD) y ajustar a mano la parte del Bicep generado que conecta el Container App con el registro externo.
 
 ### 13. CI/CD
@@ -254,4 +254,4 @@ infra/                                  # Bicep generado por Aspire/azd, version
 
 ## Pendiente de definir
 
-- Validar en el momento de implementar si el soporte de Aspire para GHCR sigue funcionando igual, dado su carácter experimental.
+Ninguno actualmente.

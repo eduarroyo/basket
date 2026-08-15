@@ -35,6 +35,14 @@ if (builder.ExecutionContext.IsPublishMode)
     // y se referencia desde Web al desplegar (aspire deploy).
     var kv = builder.AddAzureKeyVault("kv");
     web.WithReference(kv);
+
+    // GitHub Container Registry en vez del Azure Container Registry por defecto de
+    // azd (architecture.md punto 12) — evita su coste fijo. API experimental
+    // (ASPIRECOMPUTE003): revisar en cada actualización de Aspire si sigue disponible.
+#pragma warning disable ASPIRECOMPUTE003
+    var registry = builder.AddContainerRegistry("ghcr", "ghcr.io", "eduarroyo/basket");
+    web.WithContainerRegistry(registry);
+#pragma warning restore ASPIRECOMPUTE003
 }
 
 var app = builder.Build();
