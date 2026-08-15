@@ -12,7 +12,7 @@ tags:
 - [x] Ejecutar `aspire add azure-appcontainers` en el `AppHost` y configurar `builder.AddAzureContainerAppEnvironment(...)`.
 - [x] Exponer `Web` públicamente (`WithExternalHttpEndpoints()`) referenciando el entorno de Container Apps.
 - [x] Ejecutar `aspire add azure-sql` y sustituir `AddSqlServer("sql")` por el recurso Azure-aware (contenedor en local con `RunAsContainer()`, Azure SQL Database Serverless real al desplegar — `architecture.md` punto 3), manteniendo el interruptor `Sql:Ephemeral` para los tests (`BAS-2`).
-- [ ] Ejecutar `aspire add azure-keyvault` y referenciar el Key Vault desde `Web`.
+- [x] Ejecutar `aspire add azure-keyvault` y referenciar el Key Vault desde `Web`.
 - [ ] Comprobar si `AddContainerRegistry`/`WithContainerRegistry` (GHCR) sigue funcionando con la versión de Aspire instalada; si no, documentar la decisión de aceptar ACR o buscar alternativa.
 - [ ] `aspire deploy --list-steps` (o equivalente) para revisar en seco qué se va a aprovisionar antes de tocar Azure de verdad.
 - [ ] Primer aprovisionamiento/despliegue real con `aspire deploy` (o `azd` si `aspire deploy` no cubre algo del plan — ver `plan.md`).

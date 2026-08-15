@@ -23,10 +23,19 @@ var sql = builder.AddAzureSqlServer("sql")
     });
 var db = sql.AddDatabase("basketbasetracker");
 
-builder.AddProject<Projects.BasketBaseTracker_Web>("web")
+var web = builder.AddProject<Projects.BasketBaseTracker_Web>("web")
     .WithExternalHttpEndpoints()
     .WithReference(db)
     .WaitFor(db);
+
+if (builder.ExecutionContext.IsPublishMode)
+{
+    // Sin emulador ni contenedor para Azure Key Vault (spec.md de BAS-3): en local
+    // se sigue sin Key Vault, con dotnet user-secrets tal cual. Solo se aprovisiona
+    // y se referencia desde Web al desplegar (aspire deploy).
+    var kv = builder.AddAzureKeyVault("kv");
+    web.WithReference(kv);
+}
 
 var app = builder.Build();
 
