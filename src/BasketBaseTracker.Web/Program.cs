@@ -15,6 +15,11 @@ if (!builder.Environment.IsDevelopment())
 
 builder.AddServiceDefaults();
 
+// Reintentos ante fallos transitorios de Azure SQL, ajustables en caliente
+// (ver ApplicationDbContext.OnConfiguring y la tabla de configuración en README.md).
+builder.Services.Configure<SqlResilienceOptions>(
+    builder.Configuration.GetSection(SqlResilienceOptions.SectionName));
+
 builder.AddSqlServerDbContext<ApplicationDbContext>("basketbasetracker");
 
 // Identity: autenticación por cookies, con roles (rol único "Administrador" en v1 —

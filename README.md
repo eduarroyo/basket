@@ -60,6 +60,21 @@ Para crear una migración nueva (en cualquier entorno, no depende de development
 dotnet ef migrations add <Nombre> --project src/BasketBaseTracker.Web
 ```
 
+### Configuración
+
+Resiliencia de `ApplicationDbContext` ante fallos transitorios de Azure SQL (auto-resume del tier Serverless, *throttling*, failover — `docs/specs/BAS-3/spec.md`). Se leen de `IConfiguration` bajo la sección `Sql:Resilience` (`appsettings.json`/`appsettings.{Environment}.json`, o la variable de entorno equivalente con `__` en vez de `:`, p. ej. `Sql__Resilience__MaxRetryCount`):
+
+| Variable | Descripción | Rango de valores | Valor recomendado |
+|---|---|---|---|
+| `Sql:Resilience:MaxRetryCount` | Número máximo de reintentos ante un fallo transitorio antes de propagar la excepción. | 0–10 (0 desactiva los reintentos) | 4 |
+| `Sql:Resilience:MaxRetryDelaySeconds` | Techo del retraso entre reintentos (crecimiento exponencial con *jitter* hasta este máximo). | 1–30 | 10 |
+
+Ambos parámetros son opcionales — si no se configuran, se usan los valores recomendados (definidos como valor por defecto en `SqlResilienceOptions`). No subir mucho por encima de estos rangos: Azure Container Apps corta cualquier request HTTP a los 240s de *ingress timeout*, y un número de reintentos/retraso demasiado alto puede hacer que la cadena de reintentos de EF Core no llegue a completarse antes de ese corte.
+
+**¿Se pueden cambiar en caliente, sin reiniciar la app?** Depende del entorno — `ApplicationDbContext.OnConfiguring` lee siempre el valor vigente de configuración (se ejecuta en cada instancia nueva del contexto, una por petición HTTP), así que el mecanismo en sí sí soporta recarga en caliente:
+- **En local** (`aspire run`): sí, de verdad — `appsettings.Development.json` se recarga en caliente por defecto en ASP.NET Core; guardar el fichero con un valor distinto surte efecto en la siguiente petición, sin reiniciar el proceso.
+- **En producción** (Azure Container Apps): no del todo — las variables de entorno de un contenedor no se recargan en caliente en .NET, así que un cambio requiere una nueva revisión de Container Apps (`az containerapp update --set-env-vars` o equivalente). Es un cambio de configuración sin *rebuild* de la imagen ni paso por el pipeline de CI/CD, pero sí reinicia el proceso — no es un hot-reload real dentro de un proceso ya en marcha.
+
 ## Estado del proyecto
 
 En desarrollo activo. Diseño (requisitos, modelo de datos, inventario de pantallas, arquitectura) completo; implementación en curso — ver el incremento en curso en `docs/specs/`.
