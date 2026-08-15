@@ -71,7 +71,7 @@ flowchart LR
 - DoS: Cloudflare (WAF básico + rate limiting + protección DDoS en el edge, plan gratuito) delante de la aplicación, más el middleware de rate limiting nativo de ASP.NET Core (`Microsoft.AspNetCore.RateLimiting`) en dos puntos concretos:
   - Endpoints de escritura del área Admin (crear/editar/eliminar): límite fijo por usuario autenticado (partición por `UserId`), holgado para uso manual normal — p. ej. 60 peticiones/minuto — pensado para frenar un script o una sesión comprometida, no el uso legítimo desde la UI.
   - Endpoint de login: límite más estricto por IP (p. ej. 5 intentos / 15 minutos), que se solapa con el bloqueo de cuenta de ASP.NET Core Identity (ver punto 7) como segunda barrera contra fuerza bruta.
-- Secretos: cadena de conexión y demás credenciales gestionadas con Managed Identity + Azure Key Vault, en vez de variables de entorno en claro.
+- Secretos: credenciales gestionadas con Azure Key Vault (accedido vía Managed Identity), en vez de variables de entorno en claro. La cadena de conexión a Azure SQL es la excepción: usa autenticación SQL (login + contraseña, esta última como secreto de Aspire expuesto como secreto del propio Container App, no en claro), no Managed Identity — revertido durante el primer despliegue de `BAS-3` por un bug de la plataforma (ver `spec.md` de `BAS-3`, "¿Se puede seguir usando Managed Identity para Azure SQL?"). El login de `Web` tiene privilegios mínimos (lectura/escritura, sin DDL), distinto del login admin usado solo para aprovisionarlo.
 
 **Justificación**: cubre directamente los tres vectores que exige el documento funcional (inyección SQL, XSS, DoS) apoyándose en su mayoría en comportamientos por defecto del framework, sin componentes adicionales que mantener.
 

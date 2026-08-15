@@ -4,6 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Solo fuera de Development: en producción, Web referencia el recurso Key Vault
+// "kv" (AppHost.cs, solo en modo publish) y sus secretos (Seed--AdminEmail,
+// Seed--AdminPassword) se cargan aquí en IConfiguration — en local se sigue usando
+// dotnet user-secrets tal cual (spec.md de BAS-3).
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("kv");
+}
+
 builder.AddServiceDefaults();
 
 builder.AddSqlServerDbContext<ApplicationDbContext>("basketbasetracker");
