@@ -17,9 +17,9 @@ flowchart LR
     CA --> AI[Application Insights<br/>OpenTelemetry]
 
     GH[GitHub Actions] -->|build + test| GH
-    GH -->|push imagen| GHCR[GitHub Container Registry]
+    GH -->|push imagen| ACR[Azure Container Registry<br/>del entorno de Container Apps]
     GH -->|azd deploy| CA
-    GHCR --> CA
+    ACR --> CA
 ```
 
 ## Decisiones de arquitectura
@@ -128,20 +128,20 @@ flowchart LR
 
 ### 12. Registro de contenedores
 
-**Decisión**: GitHub Container Registry (`ghcr.io`), usando el soporte de Aspire para registros externos (`AddContainerRegistry` + `WithContainerRegistry`), en vez del Azure Container Registry que `azd` provisiona por defecto.
+**Decisión**: el Azure Container Registry (Basic) que `AddAzureContainerAppEnvironment` aprovisiona automáticamente para el entorno de Container Apps — sin registro externo (GHCR) ni configuración adicional en el `AppHost`.
 
-**Justificación**: mantiene el compromiso de "solo infraestructura gratuita" del documento funcional — Azure Container Registry tiene un coste fijo (~5$/mes) que GHCR evita.
+**Historial**: la decisión original (propuesta en `BAS-3`) era usar GitHub Container Registry (`ghcr.io`) vía `AddContainerRegistry` + `WithContainerRegistry`, para evitar el coste fijo de ACR (~5$/mes) y mantener el compromiso de "solo infraestructura gratuita" del documento funcional. Revertida tras comprobar en la práctica (`aspire deploy --list-steps`) que **`AddAzureContainerAppEnvironment` aprovisiona su propio ACR de todos modos** para la identidad administrada del entorno, se use o no ese registro para las imágenes de las apps — confirmado también en la documentación oficial de Aspire ("*Compute environments such as AzureContainerAppEnvironment automatically provision a default Azure Container Registry when none is specified*"). No existe, a fecha de Aspire 13.4.6, ninguna combinación de APIs que permita un entorno **nuevo** sin ACR asociado; la única combinación que lo evita (`AsExisting` sobre entorno, ACR e identidad) exige que las tres piezas ya existan aprovisionadas fuera de Aspire, lo cual no aplica a este proyecto.
 
-**Riesgos a vigilar**:
-- La API `AddContainerRegistry`/`WithContainerRegistry` es experimental en Aspire (diagnóstico `ASPIRECOMPUTE003`, hay que suprimirlo explícitamente para compilar), puede cambiar en futuras versiones. Validado que sigue disponible en Aspire 13.4.6 (`BAS-3`).
-- A diferencia de ACR, la autenticación contra GHCR no está integrada automáticamente con Container Apps: hay que gestionar las credenciales manualmente (`docker login` en local, secreto en GitHub Actions para CI/CD) y ajustar a mano la parte del Bicep generado que conecta el Container App con el registro externo.
+**Justificación**: dado que el ACR es inevitable con Azure Container Apps, usar GHCR además no reduce el coste — solo añade un registro más que gestionar (credenciales, `docker login`, ajustes manuales al Bicep generado). Se acepta el ACR por defecto como excepción documentada al principio de "solo infraestructura gratuita": es un coste fijo pequeño (~5$/mes) inherente a la plataforma de cómputo elegida (punto 3), no a una elección de registro evitable.
+
+**Riesgo a vigilar**: si en el futuro Aspire permite desacoplar el ACR del entorno (o se cambia de plataforma de cómputo — ver punto 3), reevaluar esta decisión.
 
 ### 13. CI/CD
 
-**Decisión**: GitHub Actions — build, tests, publicación de la imagen en GHCR y despliegue a Container Apps vía `azd`. Se parte del workflow base que genera `azd pipeline config` y se amplía con los pasos de test: unitarios e integración en cada push/PR (bloquean el merge si fallan), smoke E2E solo en el workflow de despliegue a producción, antes de promocionar la imagen (ver punto 15).
+**Decisión**: GitHub Actions — build, tests, publicación de la imagen en el Azure Container Registry del entorno de Container Apps (punto 12) y despliegue a Container Apps vía `azd`. Se parte del workflow base que genera `azd pipeline config` y se amplía con los pasos de test: unitarios e integración en cada push/PR (bloquean el merge si fallan), smoke E2E solo en el workflow de despliegue a producción, antes de promocionar la imagen (ver punto 15).
 
 - **Entornos**: uno solo, producción, mapeado a la rama `main`. `develop` y las ramas `feature/BAS-N` no despliegan a ningún entorno en la nube — se validan con los tests de CI (punto 15) y con Aspire en local. Evita el coste recurrente de una segunda base de datos.
-- **Etiquetado de imágenes**: cada imagen en GHCR se etiqueta con el SHA corto del commit de `main` que la generó, para trazabilidad exacta entre imagen desplegada y código; sin depender de un tag móvil tipo `latest`.
+- **Etiquetado de imágenes**: cada imagen se etiqueta con el SHA corto del commit de `main` que la generó, para trazabilidad exacta entre imagen desplegada y código; sin depender de un tag móvil tipo `latest`.
 - **Migraciones de base de datos**: se aplican como un paso explícito del pipeline (`dotnet ef database update`) antes de desplegar la nueva revisión del Container App, en una única ejecución controlada — no al arrancar cada instancia de la aplicación, para evitar que varias réplicas intenten migrar a la vez en un pico de tráfico.
 - **Despliegue y rollback**: Container Apps en modo de revisiones múltiples (`Multiple` revision mode); cada despliegue crea una revisión nueva con el 100% del tráfico, sin desactivar la anterior. Revertir un despliegue problemático es un cambio manual de tráfico a la revisión previa, sin reconstruir ni redesplegar nada — coste cero, porque una revisión inactiva en un plan de consumo no consume recursos.
 - **Rollback de esquema**: sin estrategia de down-migration automatizada; si una migración desplegada resulta problemática, se corrige hacia delante con una nueva migración, no revirtiendo la anterior.

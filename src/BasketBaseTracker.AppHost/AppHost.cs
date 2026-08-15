@@ -35,15 +35,13 @@ if (builder.ExecutionContext.IsPublishMode)
     // y se referencia desde Web al desplegar (aspire deploy).
     var kv = builder.AddAzureKeyVault("kv");
     web.WithReference(kv);
-
-    // GitHub Container Registry en vez del Azure Container Registry por defecto de
-    // azd (architecture.md punto 12) — evita su coste fijo. API experimental
-    // (ASPIRECOMPUTE003): revisar en cada actualización de Aspire si sigue disponible.
-#pragma warning disable ASPIRECOMPUTE003
-    var registry = builder.AddContainerRegistry("ghcr", "ghcr.io", "eduarroyo/basket");
-    web.WithContainerRegistry(registry);
-#pragma warning restore ASPIRECOMPUTE003
 }
+
+// Sin registro de contenedores propio: AddAzureContainerAppEnvironment aprovisiona
+// siempre su propio Azure Container Registry (Basic) para la identidad administrada
+// del entorno, se use o no para las imágenes — GHCR no evita ese coste fijo, así
+// que se acepta el ACR por defecto en vez de gestionar un registro adicional
+// (architecture.md punto 12, revisado en BAS-3).
 
 var app = builder.Build();
 
