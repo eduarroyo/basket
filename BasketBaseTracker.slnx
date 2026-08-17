@@ -27,11 +27,6 @@
     <File Path="docs/reglamento/Reglas_Oficiales_de_Baloncesto_FIBA_2022_V2.pdf" />
     <File Path="docs/reglamento/RGyC-FAB.pdf" />
   </Folder>
-  <Folder Name="/docs/specs/BAS-3/">
-    <File Path="docs/specs/BAS-3/spec.md" />
-    <File Path="docs/specs/BAS-3/plan.md" />
-    <File Path="docs/specs/BAS-3/tasks.md" />
-  </Folder>
   <Folder Name="/docs/specs/" />
   <Folder Name="/docs/specs/archive/" />
   <Folder Name="/docs/specs/archive/BAS-1/">
@@ -43,6 +38,11 @@
     <File Path="docs/specs/archive/BAS-2/spec.md" />
     <File Path="docs/specs/archive/BAS-2/plan.md" />
     <File Path="docs/specs/archive/BAS-2/tasks.md" />
+  </Folder>
+  <Folder Name="/docs/specs/archive/BAS-3/">
+    <File Path="docs/specs/archive/BAS-3/spec.md" />
+    <File Path="docs/specs/archive/BAS-3/plan.md" />
+    <File Path="docs/specs/archive/BAS-3/tasks.md" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BasketBaseTracker.Tests/BasketBaseTracker.Tests.csproj" />
