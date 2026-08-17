@@ -1,0 +1,127 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Tag de la imagen ya publicada en el ACR a desplegar
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  RESOURCE_GROUP: rg-basketbasetracker-prod
+  SQL_SERVER: basketbasetracker-sql
+  CONTAINER_APP: web
+  ACR_LOGIN_SERVER: acaenvacrvrvkmus7ak2fy.azurecr.io
+  CONTAINER_REPOSITORY: basketbasetracker-web
+  KEY_VAULT: kv-vrvkmus7ak2fy
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Iniciar sesión en Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # provision-sql-app-login (AppHost.cs) ya no hace falta volver a ejecutarlo
+      # aquí (es un paso del pipeline de "aspire deploy", que este workflow no usa
+      # — ver spec.md/tasks.md de BAS-3). Pero "dotnet ef database update" sí
+      # necesita conectar directo a Azure SQL desde este runner, sin IP fija.
+      - name: Abrir temporalmente el firewall de Azure SQL para este runner
+        run: |
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          echo "RUNNER_IP=$RUNNER_IP" >> "$GITHUB_ENV"
+          az sql server firewall-rule create \
+            --resource-group "$RESOURCE_GROUP" --server "$SQL_SERVER" \
+            --name "gha-${{ github.run_id }}" \
+            --start-ip-address "$RUNNER_IP" --end-ip-address "$RUNNER_IP"
+
+      - name: Restaurar herramientas .NET
+        run: dotnet tool restore
+
+      # Login "sqladmin" (único con permisos DDL) — basketbasetracker_app (el que
+      # usa Web en tiempo de ejecución) solo tiene datareader/datawriter/execute.
+      - name: Aplicar migraciones de base de datos
+        env:
+          SQL_ADMIN_PASSWORD: ${{ secrets.AZURE_SQL_ADMIN_PASSWORD }}
+        run: |
+          dotnet ef database update \
+            --project src/BasketBaseTracker.Web \
+            --connection "Server=tcp:${SQL_SERVER}.database.windows.net,1433;Initial Catalog=basketbasetracker;User ID=sqladmin;Password=${SQL_ADMIN_PASSWORD};Encrypt=True;TrustServerCertificate=False;"
+
+      # Container Apps en modo "Multiple" con el tráfico ya fijado explícitamente a
+      # la revisión activa (paso previo, fuera de este workflow): la revisión nueva
+      # nace con 0% de tráfico, no la ve nadie hasta que se promociona más abajo.
+      - name: Desplegar la revisión nueva sin tráfico
+        id: new-revision
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          SUFFIX="sha-${IMAGE_TAG}"
+          az containerapp update \
+            --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
+            --image "${ACR_LOGIN_SERVER}/${CONTAINER_REPOSITORY}:${IMAGE_TAG}" \
+            --revision-suffix "$SUFFIX"
+
+          REVISION_NAME="${CONTAINER_APP}--${SUFFIX}"
+          FQDN=$(az containerapp revision show \
+            --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
+            --revision "$REVISION_NAME" --query "properties.fqdn" -o tsv)
+
+          echo "name=$REVISION_NAME" >> "$GITHUB_OUTPUT"
+          echo "fqdn=$FQDN" >> "$GITHUB_OUTPUT"
+
+      - name: Leer credenciales del administrador desde Key Vault
+        id: admin-creds
+        run: |
+          EMAIL=$(az keyvault secret show --vault-name "$KEY_VAULT" --name Seed--AdminEmail --query value -o tsv)
+          PASSWORD=$(az keyvault secret show --vault-name "$KEY_VAULT" --name Seed--AdminPassword --query value -o tsv)
+          echo "::add-mask::$PASSWORD"
+          echo "email=$EMAIL" >> "$GITHUB_OUTPUT"
+          echo "password=$PASSWORD" >> "$GITHUB_OUTPUT"
+
+      - name: Compilar los tests E2E e instalar navegadores de Playwright
+        run: |
+          dotnet build tests/BasketBaseTracker.Tests.E2E -c Release
+          pwsh tests/BasketBaseTracker.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+
+      # Smoke test contra la URL específica de la revisión nueva (WebAppFixture.cs,
+      # modo "URL externa"), todavía sin tráfico real — si falla, no se promociona
+      # nada y el job termina en rojo (spec.md/architecture.md de BAS-3).
+      - name: Smoke test contra la revisión desplegada
+        env:
+          E2E_EXTERNAL_URL: https://${{ steps.new-revision.outputs.fqdn }}
+          E2E_ADMIN_EMAIL: ${{ steps.admin-creds.outputs.email }}
+          E2E_ADMIN_PASSWORD: ${{ steps.admin-creds.outputs.password }}
+        run: dotnet test tests/BasketBaseTracker.Tests.E2E -c Release --no-build
+
+      - name: Promocionar el tráfico a la revisión nueva
+        env:
+          REVISION_NAME: ${{ steps.new-revision.outputs.name }}
+        run: |
+          az containerapp ingress traffic set \
+            --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
+            --revision-weight "${REVISION_NAME}=100"
+
+      - name: Cerrar el firewall temporal de Azure SQL
+        if: always()
+        run: |
+          az sql server firewall-rule delete \
+            --resource-group "$RESOURCE_GROUP" --server "$SQL_SERVER" \
+            --name "gha-${{ github.run_id }}" --yes
