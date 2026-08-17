@@ -1,7 +1,7 @@
 ---
 codigo: BAS-4
 titulo: Dominio propio y Cloudflare (CDN, WAF, rate limiting)
-estado: En aclaración
+estado: Planificado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-17
 dependeDe:
@@ -18,12 +18,14 @@ BAS-3 dejó la aplicación accesible en la URL por defecto de Azure Container Ap
 
 ## Alcance
 
-- Registro del dominio `basketbase.es` (techo de gasto: 15€/año), en el registrador que se decida en `## Aclaraciones`.
+- Registro del dominio `basketbase.es` en Hostinger (techo de gasto: 15€/año).
 - Delegación de los *nameservers* del dominio a Cloudflare (plan gratuito).
-- Dominio personalizado en Azure Container Apps (`az containerapp hostname add`/equivalente en Aspire) con certificado TLS gestionado, para que `basketbase.es` (y/o `www.basketbase.es`, ver aclaraciones) sirvan la app directamente, no solo la URL por defecto de `azurecontainerapps.io`.
+- Dominio personalizado en Azure Container Apps (`az containerapp hostname add`/equivalente en Aspire) con certificado TLS gestionado, para que `basketbase.es` (apex, dominio canónico) sirva la app directamente, no solo la URL por defecto de `azurecontainerapps.io`.
+- `www.basketbase.es` como redirección 301 al apex (Cloudflare Redirect Rule, sin necesidad de un segundo dominio personalizado en Container Apps).
+- Redirección 301 de la URL por defecto de Container Apps (`*.azurecontainerapps.io`) a `basketbase.es` — a nivel de aplicación (middleware de redirección por host), ya que esa URL no pasa por Cloudflare.
 - Cache Rule de Cloudflare ("Cache Everything" respetando `Cache-Control` del origen) sobre las rutas públicas, excluyendo explícitamente `/Admin/*` — arquitectura ya decidida en `architecture.md` punto 5.
 - WAF básico + rate limiting de borde de Cloudflare (plan gratuito) — arquitectura ya decidida en `architecture.md` punto 6.
-- Verificación de que la URL por defecto de Container Apps sigue funcionando o se redirige correctamente (decisión pendiente, ver aclaraciones).
+- Modo SSL `Full (strict)` en Cloudflare, con el registro DNS del dominio en modo "solo DNS" (sin proxy) mientras Azure valida el dominio y emite el certificado gestionado, activando el proxy (naranja) después.
 
 ## Fuera de alcance
 
@@ -34,18 +36,19 @@ BAS-3 dejó la aplicación accesible en la URL por defecto de Azure Container Ap
 
 ## Criterios de aceptación
 
-- [ ] El dominio `basketbase.es` está registrado y sus *nameservers* apuntan a Cloudflare.
-- [ ] La aplicación es accesible por HTTPS en `basketbase.es` (y/o `www.basketbase.es`, según se resuelva en aclaraciones), con certificado válido de extremo a extremo (Cloudflare edge → origen).
+- [ ] El dominio `basketbase.es` está registrado en Hostinger y sus *nameservers* apuntan a Cloudflare.
+- [ ] La aplicación es accesible por HTTPS en `basketbase.es` (dominio canónico), con certificado válido de extremo a extremo (Cloudflare edge → origen, modo `Full strict`).
+- [ ] `www.basketbase.es` redirige (301) a `basketbase.es`.
+- [ ] `*.azurecontainerapps.io` redirige (301) a `basketbase.es`.
 - [ ] Las páginas públicas se sirven con cabeceras de caché de Cloudflare (`cf-cache-status: HIT` en peticiones repetidas dentro del TTL); `/Admin/*` nunca se cachea.
 - [ ] El WAF de Cloudflare está activo (reglas gestionadas del plan gratuito) y el rate limiting de borde configurado según `architecture.md` punto 6.
-- [ ] Un intento de acceso directo a la URL de `azurecontainerapps.io` sigue funcionando o redirige a `basketbase.es`, según lo que se decida en aclaraciones — no debe quedar en un estado indefinido.
 
 ## Aclaraciones
 
-- **¿Dónde se registra el dominio?** → Pendiente de confirmar: `basketbase.es` está disponible en Hostinger (comprobado por el usuario). Cloudflare Registrar (precio de coste, sin margen) es la alternativa habitual cuando ya se va a usar Cloudflare para DNS, pero no admite altas nuevas de dominios `.es` (solo transferencias de dominios ya registrados en otro sitio) — así que el alta inicial tendría que ser en Hostinger (u otro registrador) de todos modos, delegando después los *nameservers* a Cloudflare. **Pendiente de decisión final del usuario.**
-- **¿Apex (`basketbase.es`) o `www.basketbase.es` como dominio canónico?** → Pendiente. Afecta a qué registro DNS es el principal y hacia dónde redirige el otro (patrón habitual: uno de los dos redirige con 301 al canónico).
-- **¿Qué pasa con la URL de `azurecontainerapps.io` una vez el dominio propio esté activo?** → Pendiente. Opciones: (a) dejarla accesible en paralelo (más simple, pero dos URLs indexables para el mismo contenido — posible impacto SEO/duplicado); (b) redirigir a `basketbase.es` a nivel de aplicación. `architecture.md` no lo cubre todavía.
-- **Modo SSL de Cloudflare (Flexible / Full / Full strict)** → Sin resolver todavía, se cierra en `plan.md`: `Full (strict)` es lo recomendable (valida el certificado del origen, no solo cifra el tramo Cloudflare→usuario) — Azure Container Apps ya da certificados gestionados gratuitos para dominios personalizados, así que no debería haber fricción, pero falta confirmarlo en la práctica.
+- **¿Dónde se registra el dominio?** → Hostinger, donde `basketbase.es` ya está comprobado como disponible. Cloudflare Registrar (precio de coste, sin margen) no admite altas nuevas de dominios `.es` — solo transferencias de dominios ya registrados en otro sitio —, así que el alta inicial en Hostinger es la única opción razonable de partida. Sin conflicto entre registrador y Cloudflare: registrador (facturación/titularidad) y DNS (Cloudflare, vía delegación de *nameservers*) son piezas independientes, un cambio de NS en el panel de Hostinger no requiere transferencia ni aprobación especial.
+- **¿Apex (`basketbase.es`) o `www.basketbase.es` como dominio canónico?** → Apex. Más corto, más natural de escribir de memoria. `www` redirige con 301 al apex (Cloudflare Redirect Rule). El apex no puede llevar un CNAME por especificación DNS, pero Cloudflare resuelve esto con *CNAME flattening* automático — sin fricción adicional por elegir el apex como canónico.
+- **¿Qué pasa con la URL de `azurecontainerapps.io` una vez el dominio propio esté activo?** → Redirige (301) a `basketbase.es`, para evitar dos URLs indexables sirviendo el mismo contenido. Esa URL no pasa por Cloudflare (es del propio Container App), así que la redirección se implementa en la aplicación (middleware que compara `HttpContext.Request.Host` y redirige si no es `basketbase.es`), no como regla de borde.
+- **Modo SSL de Cloudflare (Flexible / Full / Full strict)** → `Full (strict)`: valida el certificado del origen, no solo cifra el tramo Cloudflare→usuario. Azure Container Apps da certificados gestionados gratuitos para dominios personalizados, así que no debería haber fricción — con un matiz de orden de pasos: mientras Azure valida el dominio y emite ese certificado, el registro DNS en Cloudflare debe estar en modo "solo DNS" (nube gris), no en modo proxy (naranja), porque el proxy podría interferir con la validación. Se activa el proxy una vez el certificado está emitido y la app responde correctamente por HTTPS en el dominio propio.
 
 ## Referencias
 
