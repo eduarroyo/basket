@@ -1,4 +1,5 @@
 using Aspire.Hosting.Pipelines;
+using Azure.Provisioning.AppContainers;
 using Azure.Provisioning.Sql;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
@@ -86,11 +87,33 @@ var web = builder.AddProject<Projects.BasketBaseTracker_Web>("web")
 
 if (builder.ExecutionContext.IsPublishMode)
 {
+    // Modo Multiple revisiones (deploy.yml, tarea 25 de BAS-3): el Bicep que genera
+    // Aspire por defecto deja "Single", que sustituye toda la revisión activa (y su
+    // tráfico) en cada despliegue, sin ventana para el smoke test antes de
+    // promocionar. Fijarlo aquí (en vez de solo con "az containerapp revision
+    // set-mode" a mano, como se hizo la primera vez) evita que el próximo "aspire
+    // deploy" manual lo revierta sin querer — spec.md documenta el porqué.
+    web.PublishAsAzureContainerApp((infra, containerApp) =>
+    {
+        containerApp.Configuration.ActiveRevisionsMode = ContainerAppActiveRevisionsMode.Multiple;
+    });
+}
+
+if (builder.ExecutionContext.IsPublishMode)
+{
     // Sin emulador ni contenedor para Azure Key Vault (spec.md de BAS-3): en local
     // se sigue sin Key Vault, con dotnet user-secrets tal cual. Solo se aprovisiona
     // y se referencia desde Web al desplegar (aspire deploy).
     var kv = builder.AddAzureKeyVault("kv");
     web.WithReference(kv);
+
+    // Application Insights (tarea 26/27 de BAS-3): solo en modo publish, igual que
+    // Key Vault — en local, "aspire run" ya da logs/trazas/métricas OTLP en el
+    // dashboard sin necesidad de un recurso Azure. WithReference inyecta
+    // APPLICATIONINSIGHTS_CONNECTION_STRING en Web (ServiceDefaults/Extensions.cs
+    // activa el exportador de Azure Monitor solo si esa variable existe).
+    var appInsights = builder.AddAzureApplicationInsights("app-insights");
+    web.WithReference(appInsights);
 
     // Credenciales del *seed* del primer administrador (architecture.md punto 7,
     // tasks.md de BAS-3): en Key Vault, no en variables de entorno en claro. Web las
