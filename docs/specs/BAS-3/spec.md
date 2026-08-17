@@ -36,13 +36,13 @@ Llevar el esqueleto de BAS-2 a un entorno real de producción en Azure: generar 
 
 ## Criterios de aceptación
 
-- [ ] `azd up`/`azd deploy` aprovisiona y despliega la aplicación en Azure sin pasos manuales no documentados.
+- [x] `aspire deploy` aprovisiona y despliega la aplicación en Azure sin pasos manuales *no documentados* — no se usa `azd` (`spec.md`, aclaración "¿Hace falta una suscripción de Azure activa...?"). Sí hay pasos manuales de *bootstrap*, de una sola vez, pero todos documentados en `tasks.md` (tarea 25): rol de Key Vault para la identidad de CI, secreto de GitHub, modo `Multiple` revisiones (este último ya fijado en el propio Bicep desde la tarea 26, no depende de un paso manual).
 - [x] La aplicación es accesible por HTTPS en la URL pública de Container Apps.
-- [ ] Las migraciones de EF Core se aplican como paso explícito del pipeline antes de desplegar, no al arrancar cada instancia — aplicado a mano una vez (`tasks.md`); pendiente automatizarlo en el job de CI/CD.
+- [x] Las migraciones de EF Core se aplican como paso explícito del pipeline antes de desplegar, no al arrancar cada instancia — automatizado en `deploy.yml` (tarea 25), confirmado de extremo a extremo en la tarea 28.
 - [x] Las credenciales del *seed* del primer administrador se leen de Key Vault (vía la identidad administrada de `Web`), no de variables de entorno en claro. La cadena de conexión a Azure SQL usa autenticación SQL, no Managed Identity — decisión revertida durante el despliegue, ver aclaración correspondiente.
-- [ ] El *seed* idempotente crea el primer administrador en el entorno de producción si no existe ninguno, igual que en local.
-- [ ] El workflow de GitHub Actions añade un job de despliegue a `main`: build + push de imagen al ACR del entorno + migración + smoke E2E + `azd deploy`.
-- [ ] El smoke E2E (`Tests.E2E`) se ejecuta y pasa antes de promocionar la imagen a producción.
+- [x] El *seed* idempotente crea el primer administrador en el entorno de producción si no existe ninguno, igual que en local — verificado en la tarea 22 con un login real contra `/Admin/Login`.
+- [x] El workflow de GitHub Actions añade un job de despliegue a `main`: build + push de imagen al ACR del entorno + migración + smoke E2E + despliegue (`az containerapp update`, no `azd deploy` — ver aclaración correspondiente). Confirmado de extremo a extremo en la tarea 28.
+- [x] El smoke E2E (`Tests.E2E`) se ejecuta y pasa antes de promocionar la imagen a producción — confirmado en la tarea 28.
 - [x] Application Insights recibe logs/trazas/métricas del entorno desplegado — confirmado con tráfico real tras el despliegue de la tarea 26.
 
 ## Aclaraciones
