@@ -60,6 +60,19 @@ Para crear una migración nueva (en cualquier entorno, no depende de development
 dotnet ef migrations add <Nombre> --project src/BasketBaseTracker.Web
 ```
 
+### Configuración
+
+Resiliencia de `ApplicationDbContext` ante fallos transitorios de Azure SQL (auto-resume del tier Serverless, *throttling*, failover — `docs/specs/BAS-3/spec.md`). Se leen de `IConfiguration` bajo la sección `Sql:Resilience` (`appsettings.json`/`appsettings.{Environment}.json`, o la variable de entorno equivalente con `__` en vez de `:`, p. ej. `Sql__Resilience__MaxRetryCount`):
+
+| Variable | Descripción | Rango de valores | Valor recomendado |
+|---|---|---|---|
+| `Sql:Resilience:MaxRetryCount` | Número máximo de reintentos ante un fallo transitorio antes de propagar la excepción. | 0–10 (0 desactiva los reintentos) | 4 |
+| `Sql:Resilience:MaxRetryDelaySeconds` | Techo del retraso entre reintentos (crecimiento exponencial con *jitter* hasta este máximo). | 1–30 | 10 |
+
+Ambos parámetros son opcionales — si no se configuran, se usan los valores recomendados (definidos como valor por defecto en `SqlResilienceOptions`). No subir mucho por encima de estos rangos: Azure Container Apps corta cualquier request HTTP a los 240s de *ingress timeout*, y un número de reintentos/retraso demasiado alto puede hacer que la cadena de reintentos de EF Core no llegue a completarse antes de ese corte.
+
+**¿Se pueden cambiar en caliente, sin reiniciar la app?** No, ni en local ni en producción — corregido tras detectar en producción que la premisa original era incorrecta (`docs/specs/BAS-3/spec.md`). `AddSqlServerDbContext` agrupa los `DbContext` en un *pool* por rendimiento, y EF Core prohíbe sobreescribir `OnConfiguring` cuando el *pooling* está activo (lanza `InvalidOperationException` en el primer uso — nunca llegó a funcionar de verdad, ni siquiera en local, hasta que se detectó en el primer despliegue real que ejercitó este código). Los reintentos se configuran una sola vez al arrancar, vía el parámetro `configureDbContextOptions` de `AddSqlServerDbContext` (`Program.cs`) — cualquier cambio, en cualquier entorno, requiere reiniciar el proceso (en producción, una nueva revisión de Container Apps).
+
 ## Estado del proyecto
 
 En desarrollo activo. Diseño (requisitos, modelo de datos, inventario de pantallas, arquitectura) completo; implementación en curso — ver el incremento en curso en `docs/specs/`.

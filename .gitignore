@@ -12,3 +12,4 @@ bin/
 obj/
 *.user
 
+/src/BasketBaseTracker.AppHost/aspire-output

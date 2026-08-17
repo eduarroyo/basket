@@ -17,9 +17,9 @@ flowchart LR
     CA --> AI[Application Insights<br/>OpenTelemetry]
 
     GH[GitHub Actions] -->|build + test| GH
-    GH -->|push imagen| GHCR[GitHub Container Registry]
+    GH -->|push imagen| ACR[Azure Container Registry<br/>del entorno de Container Apps]
     GH -->|azd deploy| CA
-    GHCR --> CA
+    ACR --> CA
 ```
 
 ## Decisiones de arquitectura
@@ -71,7 +71,7 @@ flowchart LR
 - DoS: Cloudflare (WAF básico + rate limiting + protección DDoS en el edge, plan gratuito) delante de la aplicación, más el middleware de rate limiting nativo de ASP.NET Core (`Microsoft.AspNetCore.RateLimiting`) en dos puntos concretos:
   - Endpoints de escritura del área Admin (crear/editar/eliminar): límite fijo por usuario autenticado (partición por `UserId`), holgado para uso manual normal — p. ej. 60 peticiones/minuto — pensado para frenar un script o una sesión comprometida, no el uso legítimo desde la UI.
   - Endpoint de login: límite más estricto por IP (p. ej. 5 intentos / 15 minutos), que se solapa con el bloqueo de cuenta de ASP.NET Core Identity (ver punto 7) como segunda barrera contra fuerza bruta.
-- Secretos: cadena de conexión y demás credenciales gestionadas con Managed Identity + Azure Key Vault, en vez de variables de entorno en claro.
+- Secretos: credenciales gestionadas con Azure Key Vault (accedido vía Managed Identity), en vez de variables de entorno en claro. La cadena de conexión a Azure SQL es la excepción: usa autenticación SQL (login + contraseña, esta última como secreto de Aspire expuesto como secreto del propio Container App, no en claro), no Managed Identity — revertido durante el primer despliegue de `BAS-3` por un bug de la plataforma (ver `spec.md` de `BAS-3`, "¿Se puede seguir usando Managed Identity para Azure SQL?"). El login de `Web` tiene privilegios mínimos (lectura/escritura, sin DDL), distinto del login admin usado solo para aprovisionarlo.
 
 **Justificación**: cubre directamente los tres vectores que exige el documento funcional (inyección SQL, XSS, DoS) apoyándose en su mayoría en comportamientos por defecto del framework, sin componentes adicionales que mantener.
 
@@ -93,7 +93,8 @@ flowchart LR
 - **Logs**: `ILogger` con mensajes estructurados (message templates, nunca interpolación de strings). `Information` para eventos de negocio relevantes (alta/edición de partidos y resultados, importación/exportación completa); `Warning` para degradación o reintentos de Polly; `Error` para excepciones no controladas. Nunca se loguean secretos, cadenas de conexión ni cualquier dato cubierto por el requisito de RGPD.
 - **Trazas**: auto-instrumentación de ASP.NET Core y EF Core (ya provista por `ServiceDefaults`), más `ActivitySource` propio para operaciones de negocio no triviales: recálculo de clasificación, importación/exportación completa, generación del feed iCal. El contexto de traza de OpenTelemetry ya correla logs/trazas/métricas entre sí, sin necesidad de un correlation ID manual.
 - **Métricas**: las automáticas de la auto-instrumentación (latencia y tasa de error por endpoint) más métricas custom con `System.Diagnostics.Metrics` (`Meter`) para: duración del recálculo de clasificación, resultado de import/export (éxito/fallo), y *cache hit/miss* del Output Caching (no expuesto por defecto; requiere instrumentación manual en el middleware).
-- **Alertas**: reglas de Azure Monitor sobre Application Insights, ligadas directamente a los NFR de `functional.md`: latencia p95 > 200ms sostenida en calendario/resultados/clasificación, tasa de error > 0,5% en esos mismos endpoints, y fallo de health checks. Canal de notificación: email, sin coste adicional y suficiente para un único administrador de sistema.
+- **Alertas**: reglas de Azure Monitor sobre Application Insights, ligadas directamente a los NFR de `functional.md`: latencia p95 > 200ms sostenida en calendario/resultados/clasificación, tasa de error > 0,5% en esos mismos endpoints, y fallo de health checks. Canal de notificación: email, sin coste adicional y suficiente para un único administrador de sistema. No son un recurso de primera clase de Aspire (no hay un `AddAzureMonitorAlert` equivalente a `AddAzureApplicationInsights`) — se configuran directamente en Azure una vez provisionados los recursos (portal o `az monitor`), no desde `AppHost.cs`.
+- **Dashboard**: Dashboards con Grafana integrados en Application Insights (experiencia nativa del propio recurso, sin cuenta ni servicio externo, sin coste adicional sobre la capa gratuita ya usada) — no el *Aspire Dashboard* desplegado en Azure Container Apps, pensado para desarrollo (ligero, sin persistencia ni configuración) y no para el uso continuado que necesita producción. Se configura directamente en Azure sobre el recurso de Application Insights ya provisionado, igual que las alertas.
 - **Disponibilidad (99,5%)**: sin sonda sintética activa por ahora, para mantener el compromiso de "solo infraestructura gratuita" (ver punto 12) — los Availability Tests de Azure Monitor tienen un coste por ejecución. Se vigila de forma reactiva a través de las métricas de error/latencia y del fallo de health checks ya descritos. Alternativa registrada en `## Mejoras futuras` (MF-3) si hiciera falta monitorización activa de uptime.
 - **Retención y coste**: capa gratuita de Application Insights (5GB/mes, 90 días de retención) debería bastar para la carga estacional esperada; el SDK aplica *adaptive sampling* por defecto para no agotar la cuota en los picos de los días de partido.
 
@@ -119,28 +120,28 @@ flowchart LR
 
 ### 11. Infraestructura como código
 
-**Decisión**: .NET Aspire (`AppHost` + `ServiceDefaults`) como modelo de orquestación local y generador de Bicep, desplegado con `azd` (Azure Developer CLI).
+**Decisión**: .NET Aspire (`AppHost` + `ServiceDefaults`) como modelo de orquestación local, desplegado con `aspire deploy` (o `azd` como alternativa) sin comprometer Bicep generado en el repositorio.
 
-**Justificación**: permite declarar la topología (Web, Azure SQL, Key Vault...) en C#, un único lenguaje también para la infraestructura. En desarrollo local, Aspire levanta contenedores equivalentes con un dashboard de logs/trazas/métricas en vivo, algo que Bicep por sí solo no ofrece. El Bicep resultante se genera automáticamente en vez de escribirse a mano, aunque queda versionado en el repositorio (`infra/`) para poder revisarlo.
+**Justificación**: permite declarar la topología (Web, Azure SQL, Key Vault...) en C#, un único lenguaje también para la infraestructura. En desarrollo local, Aspire levanta contenedores equivalentes con un dashboard de logs/trazas/métricas en vivo, algo que Bicep por sí solo no ofrece. Por defecto, tanto `aspire deploy` como `azd provision`/`azd deploy` generan el Bicep **en memoria** en el momento del despliegue a partir del modelo de `AppHost.cs` — no se escribe a disco ([documentación oficial](https://learn.microsoft.com/dotnet/aspire/deployment/azd/aca-deployment-azd-in-depth#how-azure-developer-cli-integration-works)). `AppHost.cs`, ya versionado, es la fuente real de infraestructura como código; no hace falta comprometer el Bicep resultante para tener el despliegue reproducible y revisable en el repositorio. Materializarlo a disco (`azd infra gen`) es un paso aparte, explícito y opcional, pensado para cuando hace falta personalizar recursos más allá de lo que expone la API de Aspire (`ConfigureInfrastructure`) — y una vez generado, deja de sincronizarse solo con `AppHost.cs`: hay que recordar regenerarlo (sobrescribiendo cualquier personalización manual) cada vez que cambia el modelo. No se usa en este proyecto salvo que una necesidad concreta lo justifique.
 
 **Riesgo a vigilar**: Aspire es un framework relativamente joven; conviene revisar los cambios entre versiones antes de actualizar.
 
 ### 12. Registro de contenedores
 
-**Decisión**: GitHub Container Registry (`ghcr.io`), usando el soporte de Aspire para registros externos (`AddContainerRegistry` + `WithContainerRegistry`), en vez del Azure Container Registry que `azd` provisiona por defecto.
+**Decisión**: el Azure Container Registry (Basic) que `AddAzureContainerAppEnvironment` aprovisiona automáticamente para el entorno de Container Apps — sin registro externo (GHCR) ni configuración adicional en el `AppHost`.
 
-**Justificación**: mantiene el compromiso de "solo infraestructura gratuita" del documento funcional — Azure Container Registry tiene un coste fijo (~5$/mes) que GHCR evita.
+**Historial**: la decisión original (propuesta en `BAS-3`) era usar GitHub Container Registry (`ghcr.io`) vía `AddContainerRegistry` + `WithContainerRegistry`, para evitar el coste fijo de ACR (~5$/mes) y mantener el compromiso de "solo infraestructura gratuita" del documento funcional. Revertida tras comprobar en la práctica (`aspire deploy --list-steps`) que **`AddAzureContainerAppEnvironment` aprovisiona su propio ACR de todos modos** para la identidad administrada del entorno, se use o no ese registro para las imágenes de las apps — confirmado también en la documentación oficial de Aspire ("*Compute environments such as AzureContainerAppEnvironment automatically provision a default Azure Container Registry when none is specified*"). No existe, a fecha de Aspire 13.4.6, ninguna combinación de APIs que permita un entorno **nuevo** sin ACR asociado; la única combinación que lo evita (`AsExisting` sobre entorno, ACR e identidad) exige que las tres piezas ya existan aprovisionadas fuera de Aspire, lo cual no aplica a este proyecto.
 
-**Riesgos a vigilar**:
-- La API `AddContainerRegistry`/`WithContainerRegistry` es experimental en Aspire (diagnóstico `ASPIRECOMPUTE003`), puede cambiar en futuras versiones.
-- A diferencia de ACR, la autenticación contra GHCR no está integrada automáticamente con Container Apps: hay que gestionar las credenciales manualmente (`docker login` en local, secreto en GitHub Actions para CI/CD) y ajustar a mano la parte del Bicep generado que conecta el Container App con el registro externo.
+**Justificación**: dado que el ACR es inevitable con Azure Container Apps, usar GHCR además no reduce el coste — solo añade un registro más que gestionar (credenciales, `docker login`, ajustes manuales al Bicep generado). Se acepta el ACR por defecto como excepción documentada al principio de "solo infraestructura gratuita": es un coste fijo pequeño (~5$/mes) inherente a la plataforma de cómputo elegida (punto 3), no a una elección de registro evitable.
+
+**Riesgo a vigilar**: si en el futuro Aspire permite desacoplar el ACR del entorno (o se cambia de plataforma de cómputo — ver punto 3), reevaluar esta decisión.
 
 ### 13. CI/CD
 
-**Decisión**: GitHub Actions — build, tests, publicación de la imagen en GHCR y despliegue a Container Apps vía `azd`. Se parte del workflow base que genera `azd pipeline config` y se amplía con los pasos de test: unitarios e integración en cada push/PR (bloquean el merge si fallan), smoke E2E solo en el workflow de despliegue a producción, antes de promocionar la imagen (ver punto 15).
+**Decisión**: GitHub Actions — build, tests, publicación de la imagen en el Azure Container Registry del entorno de Container Apps (punto 12) y despliegue a Container Apps vía `azd`. Se parte del workflow base que genera `azd pipeline config` y se amplía con los pasos de test: unitarios e integración en cada push/PR (bloquean el merge si fallan), smoke E2E solo en el workflow de despliegue a producción, antes de promocionar la imagen (ver punto 15).
 
 - **Entornos**: uno solo, producción, mapeado a la rama `main`. `develop` y las ramas `feature/BAS-N` no despliegan a ningún entorno en la nube — se validan con los tests de CI (punto 15) y con Aspire en local. Evita el coste recurrente de una segunda base de datos.
-- **Etiquetado de imágenes**: cada imagen en GHCR se etiqueta con el SHA corto del commit de `main` que la generó, para trazabilidad exacta entre imagen desplegada y código; sin depender de un tag móvil tipo `latest`.
+- **Etiquetado de imágenes**: cada imagen se etiqueta con el SHA corto del commit de `main` que la generó, para trazabilidad exacta entre imagen desplegada y código; sin depender de un tag móvil tipo `latest`.
 - **Migraciones de base de datos**: se aplican como un paso explícito del pipeline (`dotnet ef database update`) antes de desplegar la nueva revisión del Container App, en una única ejecución controlada — no al arrancar cada instancia de la aplicación, para evitar que varias réplicas intenten migrar a la vez en un pico de tráfico.
 - **Despliegue y rollback**: Container Apps en modo de revisiones múltiples (`Multiple` revision mode); cada despliegue crea una revisión nueva con el 100% del tráfico, sin desactivar la anterior. Revertir un despliegue problemático es un cambio manual de tráfico a la revisión previa, sin reconstruir ni redesplegar nada — coste cero, porque una revisión inactiva en un plan de consumo no consume recursos.
 - **Rollback de esquema**: sin estrategia de down-migration automatizada; si una migración desplegada resulta problemática, se corrige hacia delante con una nueva migración, no revirtiendo la anterior.
@@ -253,4 +254,4 @@ infra/                                  # Bicep generado por Aspire/azd, version
 
 ## Pendiente de definir
 
-- Validar en el momento de implementar si el soporte de Aspire para GHCR sigue funcionando igual, dado su carácter experimental.
+Ninguno actualmente.

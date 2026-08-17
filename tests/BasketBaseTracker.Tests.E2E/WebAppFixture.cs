@@ -9,17 +9,34 @@ namespace BasketBaseTracker.Tests.E2E;
 // en vez de por test — levantar el contenedor de SQL Server tarda del orden de segundos.
 public sealed class WebAppFixture : IAsyncLifetime
 {
-    public const string AdminEmail = "test-admin@basketbasetracker.local";
-    public const string AdminPassword = "ClaveDePruebasE2E123!";
+    private const string DefaultAdminEmail = "test-admin@basketbasetracker.local";
+    private const string DefaultAdminPassword = "ClaveDePruebasE2E123!";
 
     private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(3);
 
     private DistributedApplication? _app;
 
     public Uri WebUrl { get; private set; } = null!;
+    public string AdminEmail { get; private set; } = DefaultAdminEmail;
+    public string AdminPassword { get; private set; } = DefaultAdminPassword;
 
     public async ValueTask InitializeAsync()
     {
+        // Modo "URL externa" (deploy.yml, BAS-3): smoke test contra la revisión de
+        // Container Apps recién desplegada en vez de levantar un AppHost local — no
+        // hay seed de prueba ahí, así que las credenciales del admin también vienen
+        // de fuera (el admin real, ya sembrado en producción).
+        var externalUrl = Environment.GetEnvironmentVariable("E2E_EXTERNAL_URL");
+        if (!string.IsNullOrEmpty(externalUrl))
+        {
+            WebUrl = new Uri(externalUrl);
+            AdminEmail = Environment.GetEnvironmentVariable("E2E_ADMIN_EMAIL")
+                ?? throw new InvalidOperationException("E2E_ADMIN_EMAIL es obligatorio cuando se define E2E_EXTERNAL_URL.");
+            AdminPassword = Environment.GetEnvironmentVariable("E2E_ADMIN_PASSWORD")
+                ?? throw new InvalidOperationException("E2E_ADMIN_PASSWORD es obligatorio cuando se define E2E_EXTERNAL_URL.");
+            return;
+        }
+
         // "Sql:Ephemeral" hace que el AppHost use un contenedor de SQL Server sin
         // puerto fijo ni volumen persistente (AppHost.cs), para no compartir estado
         // ni puerto con la base de datos de desarrollo local ni con otros tests —

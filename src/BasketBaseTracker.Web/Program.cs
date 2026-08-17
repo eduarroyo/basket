@@ -4,9 +4,39 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Solo fuera de Development: en producción, Web referencia el recurso Key Vault
+// "kv" (AppHost.cs, solo en modo publish) y sus secretos (Seed--AdminEmail,
+// Seed--AdminPassword) se cargan aquí en IConfiguration — en local se sigue usando
+// dotnet user-secrets tal cual (spec.md de BAS-3).
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddAzureKeyVaultSecrets("kv");
+}
+
 builder.AddServiceDefaults();
 
-builder.AddSqlServerDbContext<ApplicationDbContext>("basketbasetracker");
+// Reintentos ante fallos transitorios de Azure SQL (tabla de configuración en
+// README.md). AddSqlServerDbContext agrupa los DbContext en un pool por
+// rendimiento — EF Core prohíbe sobreescribir OnConfiguring cuando el pooling
+// está activo (InvalidOperationException en el primer uso, detectado en
+// producción: BAS-3, spec.md), así que los reintentos se configuran aquí, una
+// sola vez al arrancar, vía configureDbContextOptions — ya no son ajustables en
+// caliente sin reiniciar la app (ni siquiera en local), a diferencia de lo que
+// se documentó originalmente.
+builder.Services.Configure<SqlResilienceOptions>(
+    builder.Configuration.GetSection(SqlResilienceOptions.SectionName));
+
+var sqlResilience = builder.Configuration
+    .GetSection(SqlResilienceOptions.SectionName)
+    .Get<SqlResilienceOptions>() ?? new SqlResilienceOptions();
+
+builder.AddSqlServerDbContext<ApplicationDbContext>(
+    "basketbasetracker",
+    configureDbContextOptions: options => options.UseSqlServer(sqlServerOptions =>
+        sqlServerOptions.EnableRetryOnFailure(
+            sqlResilience.MaxRetryCount,
+            TimeSpan.FromSeconds(sqlResilience.MaxRetryDelaySeconds),
+            errorNumbersToAdd: null)));
 
 // Identity: autenticación por cookies, con roles (rol único "Administrador" en v1 —
 // architecture.md punto 7). Sin autorregistro ni confirmación por email, así que se

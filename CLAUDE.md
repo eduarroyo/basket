@@ -15,6 +15,7 @@ Plataforma de seguimiento de la competición de baloncesto base de la provincia 
 - Todo el trabajo de desarrollo sigue el ciclo de `docs/workflow.md`: cada incremento es una spec `BAS-N` en `docs/specs/BAS-N/` (spec.md → plan.md → tasks.md → implementación → cierre).
 - Cada incremento se trabaja en su propia rama `feature/BAS-N`, creada desde `develop`.
 - **Nunca fusionar un PR ni borrar una rama sin confirmación humana explícita**, aunque todas las tareas de `tasks.md` estén completas.
+- `main` y `develop` son ramas protegidas en GitHub (configuración gestionada directamente por el propietario del repositorio, no por el asistente): sin *push* directo, PR obligatorio, al menos una aprobación de un desarrollador y la pipeline de CI (build + tests) en verde antes de poder fusionar — refuerzo a nivel de plataforma de la regla anterior.
 - Usar siempre las CLIs de Aspire y de .NET para crear/gestionar proyectos (ver skills `aspire` y `dotnet` en `.claude/skills/`) — nunca escribir a mano ficheros de proyecto que esas herramientas generan.
 - Solo SDK de .NET 10 **estable** — nunca preview (ver `global.json`).
 - Las specs usan frontmatter de Obsidian en `camelCase` (`codigo`, `titulo`, `estado`, `autor`, `fechaCreacion`, `dependeDe`, `tags`) — plantillas completas en `docs/workflow.md`.
