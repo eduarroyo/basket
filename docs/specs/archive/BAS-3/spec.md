@@ -1,7 +1,7 @@
 ---
 codigo: BAS-3
 titulo: Despliegue a producción en Azure
-estado: Planificado
+estado: Archivado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-04
 dependeDe:
