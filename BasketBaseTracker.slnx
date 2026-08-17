@@ -28,6 +28,11 @@
     <File Path="docs/reglamento/RGyC-FAB.pdf" />
   </Folder>
   <Folder Name="/docs/specs/" />
+  <Folder Name="/docs/specs/BAS-4/">
+    <File Path="docs/specs/BAS-4/spec.md" />
+    <File Path="docs/specs/BAS-4/plan.md" />
+    <File Path="docs/specs/BAS-4/tasks.md" />
+  </Folder>
   <Folder Name="/docs/specs/archive/" />
   <Folder Name="/docs/specs/archive/BAS-1/">
     <File Path="docs/specs/archive/BAS-1/spec.md" />
