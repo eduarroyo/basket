@@ -1,0 +1,78 @@
+name: Publish
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  actions: write # necesario para disparar deploy.yml (workflow_dispatch) al final
+
+env:
+  ACR_NAME: acaenvacrvrvkmus7ak2fy
+  ACR_LOGIN_SERVER: acaenvacrvrvkmus7ak2fy.azurecr.io
+  CONTAINER_REPOSITORY: basketbasetracker-web
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar
+        run: dotnet build --no-restore
+
+      # Igual que en ci.yml: main puede recibir un commit que no pasó por develop
+      # (hotfix), así que se repiten las mismas comprobaciones antes de publicar.
+      - name: Confiar en el certificado HTTPS de desarrollo
+        run: |
+          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+          echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
+          dotnet dev-certs https --trust
+
+      - name: Ejecutar tests unitarios e integración
+        run: dotnet test tests/BasketBaseTracker.Tests --no-build
+
+      - name: Calcular el SHA corto del commit
+        id: sha
+        run: echo "short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Iniciar sesión en Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Iniciar sesión en el Azure Container Registry
+        run: az acr login --name "$ACR_NAME"
+
+      # SDK Container Support nativo de .NET (sin Dockerfile): tag = SHA corto del
+      # commit de main, sin "latest" (architecture.md punto 13).
+      - name: Construir y publicar la imagen
+        env:
+          IMAGE_TAG: ${{ steps.sha.outputs.short }}
+        run: |
+          dotnet publish src/BasketBaseTracker.Web -c Release \
+            -p:PublishProfile=DefaultContainer \
+            -p:ContainerRegistry="$ACR_LOGIN_SERVER" \
+            -p:ContainerRepository="$CONTAINER_REPOSITORY" \
+            -p:ContainerImageTag="$IMAGE_TAG"
+
+      # deploy.yml solo reacciona a workflow_dispatch (spec.md de BAS-3): nunca a un
+      # push directo, para poder también dispararlo a mano con un image_tag antiguo.
+      - name: Disparar el despliegue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          IMAGE_TAG: ${{ steps.sha.outputs.short }}
+        run: gh workflow run deploy.yml --ref main -f image_tag="$IMAGE_TAG"

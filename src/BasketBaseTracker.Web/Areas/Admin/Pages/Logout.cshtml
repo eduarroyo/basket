@@ -1,0 +1,19 @@
+@page
+@model LogoutModel
+@{
+    ViewData["Title"] = "Cerrar sesión";
+}
+
+<h1>@ViewData["Title"]</h1>
+@{
+    if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <form asp-area="Admin" asp-page="/Logout" method="post">
+            <button type="submit" class="btn btn-link">Cerrar sesión</button>
+        </form>
+    }
+    else
+    {
+        <p>Has cerrado sesión correctamente.</p>
+    }
+}

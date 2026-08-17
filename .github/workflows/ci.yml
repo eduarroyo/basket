@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Restaurar dependencias
+        run: dotnet restore
+
+      - name: Compilar
+        run: dotnet build --no-restore
+
+      # El test de integración llama a Web por HTTPS con el certificado de desarrollo
+      # de Kestrel; sin confiar en él aquí, la validación de la cadena de certificados
+      # falla con UntrustedRoot en el runner. Soportado en Linux desde el SDK de .NET 9
+      # (global.json fija una versión posterior) — ver "Enforce HTTPS in ASP.NET Core"
+      # en Microsoft Learn, sección "Linux-specific considerations". La confianza vía
+      # OpenSSL (la que usa .NET para validar TLS en Linux) exige además apuntar
+      # SSL_CERT_DIR a la carpeta donde se exporta el certificado, junto con el
+      # almacén de certificados por defecto de Ubuntu/Debian (/usr/lib/ssl/certs) para
+      # no perder la confianza en certificados reales (nuget.org, github.com...).
+      - name: Confiar en el certificado HTTPS de desarrollo
+        run: |
+          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+          echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
+          dotnet dev-certs https --trust
+
+      # Solo unitarios e integración (architecture.md punto 13 y 15) — el smoke E2E
+      # con Playwright de Tests.E2E se ejecuta únicamente en el workflow de despliegue
+      # a producción, antes de promocionar la imagen (BAS-3).
+      - name: Ejecutar tests unitarios e integración
+        run: dotnet test tests/BasketBaseTracker.Tests --no-build
