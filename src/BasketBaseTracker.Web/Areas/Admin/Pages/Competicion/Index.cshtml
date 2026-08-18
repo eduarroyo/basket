@@ -30,7 +30,8 @@
             <td>@item.PuntosDerrota</td>
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
-                <a asp-area="Admin" asp-page="/Jornada/Index" asp-route-competicionId="@item.Id">Calendario</a>
+                <a asp-area="Admin" asp-page="/Jornada/Index" asp-route-competicionId="@item.Id">Calendario</a> |
+                <a asp-area="Admin" asp-page="/Clasificacion/Index" asp-route-competicionId="@item.Id">Clasificación</a>
             </td>
         </tr>
 }
