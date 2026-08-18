@@ -1,0 +1,24 @@
+@page "{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.FichasJugador
+@model DeleteModel
+@{
+    ViewData["Title"] = "Dar de baja ficha";
+}
+
+<h1>Dar de baja ficha — @Model.Equipo.Nombre</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <dl class="row">
+            <dt class="col-sm-4">Dorsal</dt>
+            <dd class="col-sm-8">@Model.FichaJugador.Dorsal</dd>
+            <dt class="col-sm-4">Posición</dt>
+            <dd class="col-sm-8">@(Model.FichaJugador.Posicion?.ToString() ?? "—")</dd>
+        </dl>
+        <form method="post">
+            <input type="hidden" asp-for="FichaJugador.Id" />
+            <input type="submit" value="Confirmar baja" class="btn btn-danger" />
+            <a asp-page="Index" asp-route-equipoId="@Model.Equipo.Id" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>

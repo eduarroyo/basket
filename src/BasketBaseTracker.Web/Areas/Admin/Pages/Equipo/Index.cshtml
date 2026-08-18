@@ -31,7 +31,8 @@
             <td>@(item.SedeHabitual?.Nombre ?? "—")</td>
             <td>@item.Estado</td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-area="Admin" asp-page="/FichaJugador/Index" asp-route-equipoId="@item.Id">Plantilla</a>
             </td>
         </tr>
 }

@@ -1,0 +1,38 @@
+@page "{equipoId:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.FichasJugador
+@model IndexModel
+@{
+    ViewData["Title"] = $"Plantilla de {Model.Equipo.Nombre}";
+}
+
+<h1>Plantilla de @Model.Equipo.Nombre</h1>
+
+<p>
+    <a asp-page="Create" asp-route-equipoId="@Model.Equipo.Id" class="btn btn-primary">Nueva ficha</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Dorsal</th>
+            <th>Posición</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Fichas)
+{
+        <tr>
+            <td>@item.Dorsal</td>
+            <td>@(item.Posicion?.ToString() ?? "—")</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Baja</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-area="Admin" asp-page="/Equipo/Index">Volver a Equipos</a>
+</div>
