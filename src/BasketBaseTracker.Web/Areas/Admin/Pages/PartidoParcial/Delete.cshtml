@@ -1,0 +1,26 @@
+@page "{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.PartidosParciales
+@model DeleteModel
+@{
+    ViewData["Title"] = "Dar de baja parcial";
+}
+
+<h1>Dar de baja parcial — @Model.Partido.EquipoLocal.Nombre vs. @Model.Partido.EquipoVisitante.Nombre</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <dl class="row">
+            <dt class="col-sm-4">Periodo</dt>
+            <dd class="col-sm-8">@Model.PartidoParcial.NumeroPeriodo</dd>
+            <dt class="col-sm-4">Puntos local</dt>
+            <dd class="col-sm-8">@Model.PartidoParcial.PuntosLocal</dd>
+            <dt class="col-sm-4">Puntos visitante</dt>
+            <dd class="col-sm-8">@Model.PartidoParcial.PuntosVisitante</dd>
+        </dl>
+        <form method="post">
+            <input type="hidden" asp-for="PartidoParcial.Id" />
+            <input type="submit" value="Confirmar baja" class="btn btn-danger" />
+            <a asp-page="Index" asp-route-partidoId="@Model.Partido.Id" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
