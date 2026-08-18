@@ -19,5 +19,5 @@ tags:
 - [x] Test de integración (`tests/BasketBaseTracker.Tests/Integration/`) que levanta el `AppHost` (mismo patrón que `AppHostTests.WebRespondeAlHealthCheck`, vía fixture compartida `AppHostSqlFixture`) y comprueba que la migración se aplica sin errores.
 - [x] Test de integración que confirma cada restricción única (`Competicion`, `FichaJugador`, `Jornada`) rechazando una inserción duplicada.
 - [x] `dotnet build` y `dotnet test` en verde en local antes de empujar.
-- [ ] Confirmar CI (build + tests) en verde en el PR.
-- [ ] Cierre: mover `docs/specs/BAS-5/` a `docs/specs/archive/BAS-5/`, abrir el PR de `feature/BAS-5` a `develop` y esperar confirmación humana para fusionarlo.
+- [x] Confirmar CI (build + tests) en verde en el PR.
+- [x] Cierre: mover `docs/specs/BAS-5/` a `docs/specs/archive/BAS-5/`, abrir el PR de `feature/BAS-5` a `develop` y esperar confirmación humana para fusionarlo.
