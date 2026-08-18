@@ -1,0 +1,48 @@
+@page "{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Temporadas
+@model EditModel
+@{
+    ViewData["Title"] = "Editar temporada";
+}
+
+<h1>Editar temporada</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Temporada.Id" />
+            <div class="form-group">
+                <label asp-for="Temporada.Nombre" class="control-label"></label>
+                <input asp-for="Temporada.Nombre" class="form-control" />
+                <span asp-validation-for="Temporada.Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Temporada.FechaInicio" class="control-label"></label>
+                <input asp-for="Temporada.FechaInicio" type="date" class="form-control" />
+                <span asp-validation-for="Temporada.FechaInicio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Temporada.FechaFin" class="control-label"></label>
+                <input asp-for="Temporada.FechaFin" type="date" class="form-control" />
+                <span asp-validation-for="Temporada.FechaFin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Temporada.Estado" class="control-label"></label>
+                <select asp-for="Temporada.Estado" asp-items="Html.GetEnumSelectList<TemporadaEstado>()" class="form-control"></select>
+                <span asp-validation-for="Temporada.Estado" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Volver al listado</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

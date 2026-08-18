@@ -10,7 +10,7 @@ public class LoginModel(SignInManager<IdentityUser> signInManager, ILogger<Login
     [BindProperty]
     public InputModel Input { get; set; } = new();
 
-    public string ReturnUrl { get; set; } = "~/";
+    public string ReturnUrl { get; set; } = "~/Admin";
 
     public class InputModel
     {
@@ -28,12 +28,12 @@ public class LoginModel(SignInManager<IdentityUser> signInManager, ILogger<Login
 
     public void OnGet(string? returnUrl = null)
     {
-        ReturnUrl = returnUrl ?? Url.Content("~/");
+        ReturnUrl = returnUrl ?? Url.Content("~/Admin");
     }
 
     public async Task<IActionResult> OnPostAsync(string? returnUrl = null)
     {
-        returnUrl ??= Url.Content("~/");
+        returnUrl ??= Url.Content("~/Admin");
 
         if (!ModelState.IsValid)
         {

@@ -31,5 +31,5 @@
 </div>
 
 @section Scripts {
-    <partial name="~/Areas/Public/Pages/Shared/_ValidationScriptsPartial.cshtml" />
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }
