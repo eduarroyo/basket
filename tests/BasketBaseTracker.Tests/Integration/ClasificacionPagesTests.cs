@@ -24,7 +24,7 @@ public class ClasificacionPagesTests(AppHostSqlFixture fixture) : IClassFixture<
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, equipoIds, equipoNombres) = await CrearCompeticionConEquiposAsync(client, "clasificacion", numeroDeEquipos: 2, cancellationToken);
+        var (competicionId, equipoIds, equipoNombres, _, _) = await CrearCompeticionConEquiposAsync(client, "clasificacion", numeroDeEquipos: 2, cancellationToken);
 
         // Jornada que cuenta: A gana a B 80-70.
         var jornadaQueCuenta = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Jornada 1 (clasificacion)", cancellationToken);
@@ -70,7 +70,7 @@ public class ClasificacionPagesTests(AppHostSqlFixture fixture) : IClassFixture<
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, _, equipoNombres) = await CrearCompeticionConEquiposAsync(client, "clasificacion-sin-partidos", numeroDeEquipos: 1, cancellationToken);
+        var (competicionId, _, equipoNombres, _, _) = await CrearCompeticionConEquiposAsync(client, "clasificacion-sin-partidos", numeroDeEquipos: 1, cancellationToken);
 
         var html = await (await client.GetAsync($"/Admin/Clasificacion/{competicionId}", cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
 
@@ -85,7 +85,7 @@ public class ClasificacionPagesTests(AppHostSqlFixture fixture) : IClassFixture<
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, _, _) = await CrearCompeticionConEquiposAsync(client, "clasificacion-cache", numeroDeEquipos: 1, cancellationToken);
+        var (competicionId, _, _, _, _) = await CrearCompeticionConEquiposAsync(client, "clasificacion-cache", numeroDeEquipos: 1, cancellationToken);
 
         using var anonimo = fixture.CreateAnonymousWebHttpClient();
         using var primeraPublica = await anonimo.GetAsync($"/competiciones/{competicionId}/clasificacion", cancellationToken);

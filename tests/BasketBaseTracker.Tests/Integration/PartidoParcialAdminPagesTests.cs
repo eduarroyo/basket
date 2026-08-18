@@ -8,7 +8,7 @@ public class PartidoParcialAdminPagesTests(AppHostSqlFixture fixture) : IClassFi
 {
     private static async Task<string> CrearPartidoDePruebaAsync(HttpClient client, string sufijo, CancellationToken cancellationToken)
     {
-        var (competicionId, equipoIds, equipoNombres) = await CrearCompeticionConEquiposAsync(client, sufijo, numeroDeEquipos: 2, cancellationToken);
+        var (competicionId, equipoIds, equipoNombres, _, _) = await CrearCompeticionConEquiposAsync(client, sufijo, numeroDeEquipos: 2, cancellationToken);
         var jornadaId = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: $"Jornada 1 ({sufijo})", cancellationToken);
         return await CrearPartidoAsync(client, jornadaId, equipoIds[0], equipoIds[1], equipoNombres[0], cancellationToken);
     }

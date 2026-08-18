@@ -69,8 +69,8 @@ public static partial class AdminHttpTestHelpers
     // Extraído de CalendarioAdminPagesTests (BAS-9) al añadir ResultadoAdminPagesTests
     // y PartidoParcialAdminPagesTests (BAS-10), que necesitan el mismo árbol
     // Temporada→Categoria→Competicion→Equipo→Jornada→Partido de partida.
-    public static async Task<(string CompeticionId, string[] EquipoIds, string[] EquipoNombres)> CrearCompeticionConEquiposAsync(
-        HttpClient client, string sufijo, int numeroDeEquipos, CancellationToken cancellationToken)
+    public static async Task<(string CompeticionId, string[] EquipoIds, string[] EquipoNombres, string TemporadaId, string[] ClubIds)> CrearCompeticionConEquiposAsync(
+        HttpClient client, string sufijo, int numeroDeEquipos, CancellationToken cancellationToken, string temporadaEstado = "0")
     {
         async Task<string> CrearAsync(string pagina, string entidad, Dictionary<string, string> campos)
         {
@@ -90,7 +90,7 @@ public static partial class AdminHttpTestHelpers
             ["Temporada.Nombre"] = $"2025-2026 ({sufijo})",
             ["Temporada.FechaInicio"] = "2025-09-01",
             ["Temporada.FechaFin"] = "2026-06-30",
-            ["Temporada.Estado"] = "0",
+            ["Temporada.Estado"] = temporadaEstado,
         });
         var categoriaId = await CrearAsync("Categoria", "Categoria", new Dictionary<string, string>
         {
@@ -116,6 +116,7 @@ public static partial class AdminHttpTestHelpers
 
         var equipoIds = new string[numeroDeEquipos];
         var equipoNombres = new string[numeroDeEquipos];
+        var clubIds = new string[numeroDeEquipos];
         for (var i = 0; i < numeroDeEquipos; i++)
         {
             var clubId = await CrearAsync("Club", "Club", new Dictionary<string, string>
@@ -124,6 +125,7 @@ public static partial class AdminHttpTestHelpers
                 ["Club.Municipio"] = "Sevilla",
                 ["Club.FechaAlta"] = "2020-01-01",
             });
+            clubIds[i] = clubId;
 
             var createEquipoPage = await client.GetAsync("/Admin/Equipo/Create", cancellationToken);
             var createEquipoToken = await GetAntiforgeryTokenAsync(createEquipoPage, cancellationToken);
@@ -144,7 +146,7 @@ public static partial class AdminHttpTestHelpers
             equipoNombres[i] = equipoNombre;
         }
 
-        return (competicionId, equipoIds, equipoNombres);
+        return (competicionId, equipoIds, equipoNombres, temporadaId, clubIds);
     }
 
     public static async Task<string> CrearJornadaAsync(

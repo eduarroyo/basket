@@ -19,7 +19,7 @@ public class CalendarioAdminPagesTests(AppHostSqlFixture fixture) : IClassFixtur
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, _, _) = await CrearCompeticionConEquiposAsync(client, "jornada-alta", numeroDeEquipos: 0, cancellationToken);
+        var (competicionId, _, _, _, _) = await CrearCompeticionConEquiposAsync(client, "jornada-alta", numeroDeEquipos: 0, cancellationToken);
         var jornadaId = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Jornada 1 (jornada-alta)", cancellationToken);
 
         var editUrl = $"/Admin/Jornada/Edit/{jornadaId}";
@@ -52,7 +52,7 @@ public class CalendarioAdminPagesTests(AppHostSqlFixture fixture) : IClassFixtur
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, _, _) = await CrearCompeticionConEquiposAsync(client, "jornada-duplicada", numeroDeEquipos: 0, cancellationToken);
+        var (competicionId, _, _, _, _) = await CrearCompeticionConEquiposAsync(client, "jornada-duplicada", numeroDeEquipos: 0, cancellationToken);
         await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Primera (jornada-duplicada)", cancellationToken);
 
         var createPage = await client.GetAsync($"/Admin/Jornada/Create/{competicionId}", cancellationToken);
@@ -80,7 +80,7 @@ public class CalendarioAdminPagesTests(AppHostSqlFixture fixture) : IClassFixtur
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, equipoIds, _) = await CrearCompeticionConEquiposAsync(client, "partido-alta", numeroDeEquipos: 2, cancellationToken);
+        var (competicionId, equipoIds, _, _, _) = await CrearCompeticionConEquiposAsync(client, "partido-alta", numeroDeEquipos: 2, cancellationToken);
         var jornadaId = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Jornada 1 (partido-alta)", cancellationToken);
 
         var createPage = await client.GetAsync($"/Admin/Partido/Create/{jornadaId}", cancellationToken);
@@ -132,7 +132,7 @@ public class CalendarioAdminPagesTests(AppHostSqlFixture fixture) : IClassFixtur
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, equipoIds, _) = await CrearCompeticionConEquiposAsync(client, "partido-mismo-equipo", numeroDeEquipos: 1, cancellationToken);
+        var (competicionId, equipoIds, _, _, _) = await CrearCompeticionConEquiposAsync(client, "partido-mismo-equipo", numeroDeEquipos: 1, cancellationToken);
         var jornadaId = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Jornada 1 (partido-mismo-equipo)", cancellationToken);
 
         var createPage = await client.GetAsync($"/Admin/Partido/Create/{jornadaId}", cancellationToken);
@@ -161,7 +161,7 @@ public class CalendarioAdminPagesTests(AppHostSqlFixture fixture) : IClassFixtur
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, equipoIds, _) = await CrearCompeticionConEquiposAsync(client, "partido-repetido", numeroDeEquipos: 3, cancellationToken);
+        var (competicionId, equipoIds, _, _, _) = await CrearCompeticionConEquiposAsync(client, "partido-repetido", numeroDeEquipos: 3, cancellationToken);
         var jornadaId = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Jornada 1 (partido-repetido)", cancellationToken);
 
         async Task<HttpResponseMessage> CrearPartidoAsync(string equipoLocalId, string equipoVisitanteId)
@@ -201,7 +201,7 @@ public class CalendarioAdminPagesTests(AppHostSqlFixture fixture) : IClassFixtur
         using var client = fixture.CreateWebHttpClient();
         await LoginAsync(client, cancellationToken);
 
-        var (competicionId, equipoIds, _) = await CrearCompeticionConEquiposAsync(client, "partido-preserva-estado", numeroDeEquipos: 2, cancellationToken);
+        var (competicionId, equipoIds, _, _, _) = await CrearCompeticionConEquiposAsync(client, "partido-preserva-estado", numeroDeEquipos: 2, cancellationToken);
         var jornadaId = await CrearJornadaAsync(client, competicionId, numero: 1, etiqueta: "Jornada 1 (partido-preserva-estado)", cancellationToken);
 
         var createPage = await client.GetAsync($"/Admin/Partido/Create/{jornadaId}", cancellationToken);
