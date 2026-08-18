@@ -1,0 +1,42 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Panel de administración";
+}
+
+<h1>Panel de administración</h1>
+
+<div class="row">
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Temporadas</h5>
+                <a asp-area="Admin" asp-page="/Temporada/Index" class="btn btn-outline-primary">Gestionar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Categorías</h5>
+                <a asp-area="Admin" asp-page="/Categoria/Index" class="btn btn-outline-primary">Gestionar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Clubes</h5>
+                <a asp-area="Admin" asp-page="/Club/Index" class="btn btn-outline-primary">Gestionar</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Sedes</h5>
+                <a asp-area="Admin" asp-page="/Sede/Index" class="btn btn-outline-primary">Gestionar</a>
+            </div>
+        </div>
+    </div>
+</div>

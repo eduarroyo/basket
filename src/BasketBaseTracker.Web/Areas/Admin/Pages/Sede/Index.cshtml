@@ -1,0 +1,35 @@
+@page
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Sedes
+@model IndexModel
+@{
+    ViewData["Title"] = "Sedes";
+}
+
+<h1>Sedes</h1>
+
+<p>
+    <a asp-page="Create" class="btn btn-primary">Nueva sede</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>@Html.DisplayNameFor(m => m.Sedes[0].Nombre)</th>
+            <th>@Html.DisplayNameFor(m => m.Sedes[0].Municipio)</th>
+            <th>@Html.DisplayNameFor(m => m.Sedes[0].Direccion)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Sedes)
+{
+        <tr>
+            <td>@Html.DisplayFor(m => item.Nombre)</td>
+            <td>@Html.DisplayFor(m => item.Municipio)</td>
+            <td>@Html.DisplayFor(m => item.Direccion)</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

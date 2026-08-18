@@ -1,0 +1,42 @@
+@page
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Clubes
+@model CreateModel
+@{
+    ViewData["Title"] = "Nuevo club";
+}
+
+<h1>Nuevo club</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Club.Nombre" class="control-label"></label>
+                <input asp-for="Club.Nombre" class="form-control" />
+                <span asp-validation-for="Club.Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Club.Municipio" class="control-label"></label>
+                <input asp-for="Club.Municipio" class="form-control" />
+                <span asp-validation-for="Club.Municipio" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Club.FechaAlta" class="control-label"></label>
+                <input asp-for="Club.FechaAlta" type="date" class="form-control" />
+                <span asp-validation-for="Club.FechaAlta" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Volver al listado</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

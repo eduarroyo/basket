@@ -21,9 +21,16 @@ public class AppHostSqlFixture : IAsyncLifetime
 {
     private static readonly TimeSpan Timeout = TimeSpan.FromMinutes(3);
 
+    public const string SeedAdminEmail = "test-admin@basketbasetracker.local";
+    public const string SeedAdminPassword = "ClaveDePruebasDeIntegracion123!";
+
     private DistributedApplication? _app;
 
     public string ConnectionString { get; private set; } = null!;
+
+    // Cada llamada crea un HttpClient nuevo (con su propio CookieContainer, para no
+    // compartir sesión autenticada entre tests que reutilicen esta misma fixture).
+    public HttpClient CreateWebHttpClient() => _app!.CreateHttpClient("web");
 
     public async ValueTask InitializeAsync()
     {
@@ -38,8 +45,8 @@ public class AppHostSqlFixture : IAsyncLifetime
         });
 
         appHost.CreateResourceBuilder<ProjectResource>("web")
-            .WithEnvironment("Seed__AdminEmail", "test-admin@basketbasetracker.local")
-            .WithEnvironment("Seed__AdminPassword", "ClaveDePruebasDeIntegracion123!");
+            .WithEnvironment("Seed__AdminEmail", SeedAdminEmail)
+            .WithEnvironment("Seed__AdminPassword", SeedAdminPassword);
 
         _app = await appHost.BuildAsync(cancellationToken).WaitAsync(Timeout, cancellationToken);
         await _app.StartAsync(cancellationToken).WaitAsync(Timeout, cancellationToken);
