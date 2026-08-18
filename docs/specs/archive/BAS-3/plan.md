@@ -1,6 +1,6 @@
 ---
 codigo: BAS-3
-estado: Planificado
+estado: Archivado
 tags:
   - plan
 ---
