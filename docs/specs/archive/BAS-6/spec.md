@@ -1,7 +1,7 @@
 ---
 codigo: BAS-6
 titulo: Área Admin — catálogo (Temporadas, Categorías, Clubes, Sedes)
-estado: Planificado
+estado: Archivado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-18
 dependeDe:

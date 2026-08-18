@@ -1,6 +1,6 @@
 ---
 codigo: BAS-6
-estado: Planificado
+estado: Archivado
 tags:
   - plan
 ---
