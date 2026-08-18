@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using static BasketBaseTracker.Tests.Integration.AdminHttpTestHelpers;
 
 namespace BasketBaseTracker.Tests.Integration;
@@ -214,7 +213,7 @@ public class GestionAnualAdminPagesTests(AppHostSqlFixture fixture) : IClassFixt
         var primeraEdicionPage = await client.GetAsync(editUrl, cancellationToken);
         var primeraEdicionHtml = await primeraEdicionPage.Content.ReadAsStringAsync(cancellationToken);
         var primeraEdicionToken = await GetAntiforgeryTokenAsync(primeraEdicionPage, cancellationToken);
-        var rowVersionOriginal = Regex.Match(primeraEdicionHtml, "name=\"Equipo\\.RowVersion\"[^>]*value=\"(?<rv>[^\"]*)\"").Groups["rv"].Value;
+        var rowVersionOriginal = ExtraerCampoOculto(primeraEdicionHtml, "Equipo.RowVersion");
 
         // El primer administrador guarda: éxito, y el RowVersion en la base de datos cambia.
         using var primerGuardado = await client.PostAsync(

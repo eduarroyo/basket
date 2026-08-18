@@ -8,6 +8,8 @@ public class PartidoParcialConfiguration : IEntityTypeConfiguration<PartidoParci
 {
     public void Configure(EntityTypeBuilder<PartidoParcial> builder)
     {
+        builder.HasIndex(p => new { p.PartidoId, p.NumeroPeriodo }).IsUnique();
+
         builder.HasOne(p => p.Partido)
             .WithMany()
             .HasForeignKey(p => p.PartidoId)

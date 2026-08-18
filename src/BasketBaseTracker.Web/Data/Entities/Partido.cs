@@ -15,6 +15,7 @@ public enum PartidoEstado
 public enum MotivoResolucion
 {
     Incomparecencia,
+    [Display(Name = "Alineación indebida")]
     AlineacionIndebida,
     Otro,
 }
@@ -53,18 +54,23 @@ public class Partido
 
     public PartidoEstado Estado { get; set; }
 
+    [Display(Name = "Puntos local")]
     public int? PuntosLocal { get; set; }
 
+    [Display(Name = "Puntos visitante")]
     public int? PuntosVisitante { get; set; }
 
     // Solo si Estado = Resuelto (data-model.md).
+    [Display(Name = "Motivo de la resolución")]
     public MotivoResolucion? MotivoResolucion { get; set; }
 
+    [Display(Name = "Equipo ganador")]
     public int? EquipoGanadorResolucionId { get; set; }
 
     [ValidateNever]
     public Equipo? EquipoGanadorResolucion { get; set; }
 
+    [StringLength(500, ErrorMessage = "El campo {0} no puede superar los {1} caracteres.")]
     public string? Observaciones { get; set; }
 
     // Concurrencia optimista (data-model.md) — evita ediciones concurrentes

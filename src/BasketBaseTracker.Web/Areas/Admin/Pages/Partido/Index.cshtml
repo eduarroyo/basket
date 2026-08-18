@@ -18,6 +18,8 @@
             <th>Visitante</th>
             <th>Sede</th>
             <th>Fecha y hora</th>
+            <th>Estado</th>
+            <th>Marcador</th>
             <th></th>
         </tr>
     </thead>
@@ -29,8 +31,11 @@
             <td>@item.EquipoVisitante.Nombre</td>
             <td>@(item.Sede?.Nombre ?? "—")</td>
             <td>@(item.FechaHora?.ToString("dd/MM/yyyy HH:mm") ?? "Aún no programado")</td>
+            <td>@item.Estado</td>
+            <td>@(item.PuntosLocal is not null && item.PuntosVisitante is not null ? $"{item.PuntosLocal}-{item.PuntosVisitante}" : "—")</td>
             <td>
-                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-area="Admin" asp-page="/Resultado/Edit" asp-route-id="@item.Id">Resultado</a>
             </td>
         </tr>
 }
