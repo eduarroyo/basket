@@ -1,6 +1,6 @@
 ---
 codigo: BAS-7
-estado: Planificado
+estado: Archivado
 tags:
   - tasks
 ---

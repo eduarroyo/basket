@@ -1,7 +1,7 @@
 ---
 codigo: BAS-7
 titulo: Área Admin — gestión anual (Competiciones y Equipos)
-estado: Planificado
+estado: Archivado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-18
 dependeDe:
