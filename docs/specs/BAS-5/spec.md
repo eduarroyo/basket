@@ -34,11 +34,11 @@ BAS-1 dejó definido el modelo de datos completo en `data-model.md`, y BAS-3 dej
 
 ## Criterios de aceptación
 
-- [ ] Las once entidades de dominio de `data-model.md` existen como clases en `Data/` con su `DbSet<T>` en `ApplicationDbContext`.
-- [ ] Las restricciones únicas de `data-model.md` (`Competicion`, `FichaJugador`, `Jornada`) están declaradas vía Fluent API y se verifican con un intento de inserción duplicada en el test de integración.
-- [ ] `Partido` y `Equipo` tienen `RowVersion` como token de concurrencia optimista.
-- [ ] La migración de EF Core se genera y se aplica sin errores contra el contenedor SQL local (`aspire run` + `dotnet ef database update`).
-- [ ] El test de integración que arranca el `AppHost` completo confirma que el esquema migra correctamente contra una base de datos real.
+- [x] Las once entidades de dominio de `data-model.md` existen como clases en `Data/` con su `DbSet<T>` en `ApplicationDbContext`.
+- [x] Las restricciones únicas de `data-model.md` (`Competicion`, `FichaJugador`, `Jornada`) están declaradas vía Fluent API y se verifican con un intento de inserción duplicada en el test de integración.
+- [x] `Partido` y `Equipo` tienen `RowVersion` como token de concurrencia optimista.
+- [x] La migración de EF Core se genera y se aplica sin errores contra el contenedor SQL local (`aspire run`).
+- [x] El test de integración que arranca el `AppHost` completo confirma que el esquema migra correctamente contra una base de datos real.
 - [ ] La rama compila y todos los tests (unitarios + integración) pasan en CI.
 
 ## Aclaraciones

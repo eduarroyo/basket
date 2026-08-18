@@ -37,7 +37,7 @@ Todas las propiedades `string` no acotadas por `data-model.md` (nombres, municip
 
 ### Claves foráneas y borrado
 
-Todas las relaciones son `Restrict` (no `Cascade`) por defecto de EF Core al no declararse lo contrario — coherente con que este incremento no implementa todavía ninguna pantalla de borrado; se revisará caso a caso (p. ej. si borrar una `Jornada` debe arrastrar sus `Partido`) cuando se construyan las pantallas de Admin que lo disparan, no aquí.
+Todas las relaciones se configuran explícitamente con `OnDelete(DeleteBehavior.Restrict)` — no se deja el valor por defecto de EF Core, que para relaciones obligatorias es `Cascade`, no `Restrict` como se apuntó tentativamente al planificar. `Partido` tiene tres claves foráneas a `Equipo` (`EquipoLocalId`, `EquipoVisitanteId`, `EquipoGanadorResolucionId`); si más de una fuera `Cascade`, SQL Server rechaza la migración con "may cause cycles or multiple cascade paths". `Restrict` en todas evita ese problema de raíz y es, además, el comportamiento correcto para este incremento: no hay ninguna pantalla de borrado todavía, así que no debe poder borrarse por accidente un `Equipo`/`Competicion`/`Jornada` que tenga partidos o datos dependientes. Se revisará caso a caso si algún borrado debe cambiar a `Cascade` cuando exista la pantalla de Admin que lo dispare.
 
 ### Migración única
 
