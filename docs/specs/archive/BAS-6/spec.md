@@ -40,7 +40,7 @@ BAS-5 dejó el modelo de datos de dominio implementado (entidades EF Core + migr
 - [x] Los formularios de alta/edición validan las restricciones del modelo (campos obligatorios, longitud máxima) y muestran los errores correspondientes sin guardar si no se cumplen.
 - [x] Una petición sin autenticar a cualquiera de las dieciséis páginas (4 entidades × Index/Create/Edit + Index del área, más las ya existentes Login/Logout) redirige a `/Admin/Login`, salvo Login/Logout — verificado en varias páginas (test automatizado + comprobación manual); la protección es la política de área ya existente de BAS-3, no algo por página.
 - [x] Existe un test de integración por entidad que cubre alta + edición + listado, y al menos un test que verifica la redirección a Login sin autenticar.
-- [ ] La rama compila y todos los tests (unitarios + integración) pasan en CI.
+- [x] La rama compila y todos los tests (unitarios + integración) pasan en CI.
 
 ## Aclaraciones
 
