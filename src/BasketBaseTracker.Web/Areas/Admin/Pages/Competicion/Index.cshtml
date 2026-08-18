@@ -1,0 +1,37 @@
+@page
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Competiciones
+@model IndexModel
+@{
+    ViewData["Title"] = "Competiciones";
+}
+
+<h1>Competiciones</h1>
+
+<p>
+    <a asp-page="Create" class="btn btn-primary">Nueva competición</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Temporada</th>
+            <th>Categoría</th>
+            <th>@Html.DisplayNameFor(m => m.Competiciones[0].PuntosVictoria)</th>
+            <th>@Html.DisplayNameFor(m => m.Competiciones[0].PuntosDerrota)</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Competiciones)
+{
+        <tr>
+            <td>@item.Temporada.Nombre</td>
+            <td>@item.Categoria.Nombre</td>
+            <td>@item.PuntosVictoria</td>
+            <td>@item.PuntosDerrota</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

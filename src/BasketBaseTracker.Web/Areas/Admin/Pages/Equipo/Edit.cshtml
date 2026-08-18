@@ -1,0 +1,56 @@
+@page "{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Equipos
+@model EditModel
+@{
+    ViewData["Title"] = "Editar equipo";
+}
+
+<h1>Editar equipo</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Equipo.Id" />
+            <input type="hidden" asp-for="Equipo.RowVersion" />
+            <div class="form-group">
+                <label asp-for="Equipo.CompeticionId" class="control-label">Competición</label>
+                <select asp-for="Equipo.CompeticionId" class="form-control" asp-items="ViewBag.CompeticionId"></select>
+                <span asp-validation-for="Equipo.CompeticionId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Equipo.ClubId" class="control-label">Club</label>
+                <select asp-for="Equipo.ClubId" class="form-control" asp-items="ViewBag.ClubId"></select>
+                <span asp-validation-for="Equipo.ClubId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Equipo.Nombre" class="control-label"></label>
+                <input asp-for="Equipo.Nombre" class="form-control" />
+                <span asp-validation-for="Equipo.Nombre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Equipo.SedeHabitualId" class="control-label">Sede habitual</label>
+                <select asp-for="Equipo.SedeHabitualId" class="form-control" asp-items="ViewBag.SedeHabitualId">
+                    <option value="">-- Sin sede habitual --</option>
+                </select>
+                <span asp-validation-for="Equipo.SedeHabitualId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Equipo.Estado" class="control-label"></label>
+                <select asp-for="Equipo.Estado" asp-items="Html.GetEnumSelectList<EquipoEstado>()" class="form-control"></select>
+                <span asp-validation-for="Equipo.Estado" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Guardar" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index">Volver al listado</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -36,10 +36,10 @@ BAS-6 dejó el catálogo (Temporadas, Categorías, Clubes, Sedes) gestionable de
 
 ## Criterios de aceptación
 
-- [ ] Un administrador autenticado puede listar, dar de alta y editar `Competicion` (con desplegables de Temporada y Categoría) y `Equipo` (con desplegables de Competición, Club y Sede habitual) desde `/Admin`.
-- [ ] Dar de alta o editar una `Competicion` con una combinación de temporada+categoría ya existente muestra un error de validación en español y no guarda el cambio.
-- [ ] Editar un `Equipo` que otro administrador modificó mientras tanto (mismo `RowVersion` obsoleto) muestra un error de concurrencia en español y no sobrescribe el cambio ajeno.
-- [ ] Existe un test de integración por entidad que cubre alta + edición + listado, y un test que verifica el rechazo de la combinación duplicada de `Competicion`.
+- [x] Un administrador autenticado puede listar, dar de alta y editar `Competicion` (con desplegables de Temporada y Categoría) y `Equipo` (con desplegables de Competición, Club y Sede habitual) desde `/Admin`.
+- [x] Dar de alta o editar una `Competicion` con una combinación de temporada+categoría ya existente muestra un error de validación en español y no guarda el cambio.
+- [x] Editar un `Equipo` que otro administrador modificó mientras tanto (mismo `RowVersion` obsoleto) muestra un error de concurrencia en español y no sobrescribe el cambio ajeno.
+- [x] Existe un test de integración por entidad que cubre alta + edición + listado, y un test que verifica el rechazo de la combinación duplicada de `Competicion`.
 - [ ] La rama compila y todos los tests (unitarios + integración) pasan en CI.
 
 ## Aclaraciones

@@ -1,0 +1,47 @@
+@page
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Competiciones
+@model CreateModel
+@{
+    ViewData["Title"] = "Nueva competición";
+}
+
+<h1>Nueva competición</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Competicion.TemporadaId" class="control-label">Temporada</label>
+                <select asp-for="Competicion.TemporadaId" class="form-control" asp-items="ViewBag.TemporadaId"></select>
+                <span asp-validation-for="Competicion.TemporadaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Competicion.CategoriaId" class="control-label">Categoría</label>
+                <select asp-for="Competicion.CategoriaId" class="form-control" asp-items="ViewBag.CategoriaId"></select>
+                <span asp-validation-for="Competicion.CategoriaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Competicion.PuntosVictoria" class="control-label"></label>
+                <input asp-for="Competicion.PuntosVictoria" class="form-control" />
+                <span asp-validation-for="Competicion.PuntosVictoria" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Competicion.PuntosDerrota" class="control-label"></label>
+                <input asp-for="Competicion.PuntosDerrota" class="form-control" />
+                <span asp-validation-for="Competicion.PuntosDerrota" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index">Volver al listado</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
