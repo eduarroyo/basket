@@ -1,0 +1,40 @@
+@page "{competicionId:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Jornadas
+@model IndexModel
+@{
+    ViewData["Title"] = $"Calendario de {Model.Competicion.Temporada.Nombre} — {Model.Competicion.Categoria.Nombre}";
+}
+
+<h1>Calendario de @Model.Competicion.Temporada.Nombre — @Model.Competicion.Categoria.Nombre</h1>
+
+<p>
+    <a asp-page="Create" asp-route-competicionId="@Model.Competicion.Id" class="btn btn-primary">Nueva jornada</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Número</th>
+            <th>Etiqueta</th>
+            <th>Cuenta para la clasificación</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Jornadas)
+{
+        <tr>
+            <td>@item.Numero</td>
+            <td>@(item.Etiqueta ?? "—")</td>
+            <td>@(item.CuentaParaClasificacion ? "Sí" : "No")</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-area="Admin" asp-page="/Partido/Index" asp-route-jornadaId="@item.Id">Partidos</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-area="Admin" asp-page="/Competicion/Index">Volver a Competiciones</a>
+</div>
