@@ -21,5 +21,5 @@ tags:
 - [x] Test de integración que confirma que dar de alta una `Competicion` duplicada (misma temporada+categoría) falla con un error de validación, no con un 500.
 - [x] Verificación manual: HTTP directo (login, alta, listados, mensajes de error) — la extensión del navegador no estaba disponible en el momento de verificar; cubierto en su lugar con inspección directa del HTML devuelto durante la depuración de los tests.
 - [x] `dotnet build` y `dotnet test` en verde en local antes de empujar (incluido el proyecto E2E).
-- [ ] Confirmar CI (build + tests) en verde en el PR.
-- [ ] Cierre: mover `docs/specs/BAS-7/` a `docs/specs/archive/BAS-7/`, abrir el PR de `feature/BAS-7` a `develop` y esperar confirmación humana para fusionarlo.
+- [x] Confirmar CI (build + tests) en verde en el PR.
+- [x] Cierre: mover `docs/specs/BAS-7/` a `docs/specs/archive/BAS-7/`, abrir el PR de `feature/BAS-7` a `develop` y esperar confirmación humana para fusionarlo.

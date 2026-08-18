@@ -40,7 +40,7 @@ BAS-6 dejó el catálogo (Temporadas, Categorías, Clubes, Sedes) gestionable de
 - [x] Dar de alta o editar una `Competicion` con una combinación de temporada+categoría ya existente muestra un error de validación en español y no guarda el cambio.
 - [x] Editar un `Equipo` que otro administrador modificó mientras tanto (mismo `RowVersion` obsoleto) muestra un error de concurrencia en español y no sobrescribe el cambio ajeno.
 - [x] Existe un test de integración por entidad que cubre alta + edición + listado, y un test que verifica el rechazo de la combinación duplicada de `Competicion`.
-- [ ] La rama compila y todos los tests (unitarios + integración) pasan en CI.
+- [x] La rama compila y todos los tests (unitarios + integración) pasan en CI.
 
 ## Aclaraciones
 
