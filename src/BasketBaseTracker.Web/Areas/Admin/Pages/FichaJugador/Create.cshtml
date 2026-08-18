@@ -1,0 +1,39 @@
+@page "{equipoId:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.FichasJugador
+@model CreateModel
+@{
+    ViewData["Title"] = "Nueva ficha";
+}
+
+<h1>Nueva ficha — @Model.Equipo.Nombre</h1>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="FichaJugador.Dorsal" class="control-label"></label>
+                <input asp-for="FichaJugador.Dorsal" class="form-control" />
+                <span asp-validation-for="FichaJugador.Dorsal" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="FichaJugador.Posicion" class="control-label">Posición</label>
+                <select asp-for="FichaJugador.Posicion" class="form-control" asp-items="Html.GetEnumSelectList<Posicion>()">
+                    <option value="">-- Sin posición asignada --</option>
+                </select>
+                <span asp-validation-for="FichaJugador.Posicion" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-page="Index" asp-route-equipoId="@Model.Equipo.Id">Volver a la plantilla</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

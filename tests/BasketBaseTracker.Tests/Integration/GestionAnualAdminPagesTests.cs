@@ -69,21 +69,6 @@ public class GestionAnualAdminPagesTests(AppHostSqlFixture fixture) : IClassFixt
         return ExtraerId(html, "Club", nombre);
     }
 
-    // Busca el enlace de edición dentro de la MISMA fila <tr> que contiene el texto
-    // de referencia, no el primero de toda la página — con IClassFixture compartida
-    // entre los [Fact] de esta clase (y xUnit ejecutándolos en paralelo por
-    // defecto), el listado puede contener filas creadas por otro test concurrente,
-    // así que "el primer enlace de edición de la página" no es fiable (comprobado:
-    // fallo intermitente al ejecutar la clase completa, pero no en aislamiento).
-    private static string ExtraerId(string indexHtml, string entidad, string textoDeReferencia)
-    {
-        Assert.Contains(textoDeReferencia, indexHtml);
-        var pattern = $"""<tr>(?:(?!</tr>)[\s\S])*?{Regex.Escape(textoDeReferencia)}(?:(?!</tr>)[\s\S])*?/Admin/{entidad}/Edit/(?<id>\d+)""";
-        var match = Regex.Match(indexHtml, pattern);
-        Assert.True(match.Success, $"No se encontró la fila de '{textoDeReferencia}' con su enlace de edición en /Admin/{entidad}.");
-        return match.Groups["id"].Value;
-    }
-
     [Fact]
     public async Task CompeticionAltaListadoYEdicion()
     {

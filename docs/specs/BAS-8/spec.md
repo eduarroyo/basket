@@ -36,10 +36,10 @@ BAS-7 dejó gestionables los `Equipo`. Este incremento añade `Plantilla de equi
 
 ## Criterios de aceptación
 
-- [ ] Un administrador autenticado puede ver, dar de alta, editar y dar de baja fichas de jugador dentro de la plantilla de un equipo concreto desde `/Admin`.
-- [ ] Dar de alta o editar una ficha con un dorsal ya usado en el mismo equipo muestra un error de validación en español y no guarda el cambio.
-- [ ] Dar de baja una ficha exige una confirmación explícita (pantalla de confirmación con los datos de la ficha) antes de borrarla.
-- [ ] Existe un test de integración que cubre alta + edición + baja + listado, y un test que verifica el rechazo del dorsal duplicado.
+- [x] Un administrador autenticado puede ver, dar de alta, editar y dar de baja fichas de jugador dentro de la plantilla de un equipo concreto desde `/Admin`.
+- [x] Dar de alta o editar una ficha con un dorsal ya usado en el mismo equipo muestra un error de validación en español y no guarda el cambio.
+- [x] Dar de baja una ficha exige una confirmación explícita (pantalla de confirmación con los datos de la ficha) antes de borrarla.
+- [x] Existe un test de integración que cubre alta + edición + baja + listado, y un test que verifica el rechazo del dorsal duplicado.
 - [ ] La rama compila y todos los tests (unitarios + integración) pasan en CI.
 
 ## Aclaraciones
