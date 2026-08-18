@@ -79,6 +79,11 @@
     <File Path="docs/specs/archive/BAS-10/plan.md" />
     <File Path="docs/specs/archive/BAS-10/tasks.md" />
   </Folder>
+  <Folder Name="/docs/specs/archive/BAS-11/">
+    <File Path="docs/specs/archive/BAS-11/spec.md" />
+    <File Path="docs/specs/archive/BAS-11/plan.md" />
+    <File Path="docs/specs/archive/BAS-11/tasks.md" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BasketBaseTracker.Tests/BasketBaseTracker.Tests.csproj" />
     <Project Path="tests/BasketBaseTracker.Tests.E2E/BasketBaseTracker.Tests.E2E.csproj" />

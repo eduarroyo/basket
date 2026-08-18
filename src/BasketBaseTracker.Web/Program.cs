@@ -1,4 +1,5 @@
 using BasketBaseTracker.Web.Data;
+using BasketBaseTracker.Web.Domain;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -58,6 +59,19 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
+});
+
+builder.Services.AddScoped<ClasificacionService>();
+
+// Output Caching de las páginas públicas (architecture.md punto 5) — TTL de 4
+// minutos, ligeramente por debajo del límite de 5 de consistencia eventual de
+// functional.md, dejando margen para la propagación hasta el edge de Cloudflare
+// (BAS-4, todavía sin configurar). Sin política base global: solo se cachea el
+// endpoint que la use explícitamente vía [OutputCache(PolicyName = "Publico")],
+// así que el área Admin queda sin caché por construcción, sin exclusión aparte.
+builder.Services.AddOutputCache(options =>
+{
+    options.AddPolicy("Publico", policy => policy.Expire(TimeSpan.FromMinutes(4)));
 });
 
 // Add services to the container.
@@ -122,6 +136,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseOutputCache();
 
 app.MapStaticAssets();
 app.MapRazorPages()

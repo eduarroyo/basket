@@ -1,0 +1,40 @@
+@page "/competiciones/{id:int}/clasificacion"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Competiciones
+@model ClasificacionModel
+@{
+    ViewData["Title"] = "Clasificación";
+}
+
+<h1>Clasificación</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Equipo</th>
+            <th>PJ</th>
+            <th>V</th>
+            <th>D</th>
+            <th>PF</th>
+            <th>PC</th>
+            <th>Dif</th>
+            <th>Puntos</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var fila in Model.Tabla)
+{
+        <tr>
+            <td>@fila.Posicion</td>
+            <td>@fila.EquipoNombre</td>
+            <td>@fila.PartidosJugados</td>
+            <td>@fila.Victorias</td>
+            <td>@fila.Derrotas</td>
+            <td>@fila.PuntosFavor</td>
+            <td>@fila.PuntosContra</td>
+            <td>@fila.DiferenciaDeTantos</td>
+            <td>@fila.PuntosClasificacion</td>
+        </tr>
+}
+    </tbody>
+</table>

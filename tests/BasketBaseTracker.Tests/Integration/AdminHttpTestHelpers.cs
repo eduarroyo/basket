@@ -147,7 +147,8 @@ public static partial class AdminHttpTestHelpers
         return (competicionId, equipoIds, equipoNombres);
     }
 
-    public static async Task<string> CrearJornadaAsync(HttpClient client, string competicionId, int numero, string etiqueta, CancellationToken cancellationToken)
+    public static async Task<string> CrearJornadaAsync(
+        HttpClient client, string competicionId, int numero, string etiqueta, CancellationToken cancellationToken, bool cuentaParaClasificacion = true)
     {
         var createPage = await client.GetAsync($"/Admin/Jornada/Create/{competicionId}", cancellationToken);
         var token = await GetAntiforgeryTokenAsync(createPage, cancellationToken);
@@ -159,7 +160,7 @@ public static partial class AdminHttpTestHelpers
                 ["__RequestVerificationToken"] = token,
                 ["Jornada.Numero"] = numero.ToString(),
                 ["Jornada.Etiqueta"] = etiqueta,
-                ["Jornada.CuentaParaClasificacion"] = "true",
+                ["Jornada.CuentaParaClasificacion"] = cuentaParaClasificacion ? "true" : "false",
             }),
             cancellationToken);
         var html = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -191,5 +192,31 @@ public static partial class AdminHttpTestHelpers
         var html = await response.Content.ReadAsStringAsync(cancellationToken);
 
         return ExtraerId(html, "Partido", equipoLocalNombre);
+    }
+
+    // Nuevo en BAS-11: marca un partido como Jugado con el marcador indicado, vía
+    // /Admin/Resultado/Edit (BAS-10).
+    public static async Task MarcarPartidoJugadoAsync(
+        HttpClient client, string partidoId, int puntosLocal, int puntosVisitante, CancellationToken cancellationToken)
+    {
+        var editUrl = $"/Admin/Resultado/Edit/{partidoId}";
+        var editPage = await client.GetAsync(editUrl, cancellationToken);
+        var editHtml = await editPage.Content.ReadAsStringAsync(cancellationToken);
+        var token = await GetAntiforgeryTokenAsync(editPage, cancellationToken);
+        var rowVersion = ExtraerCampoOculto(editHtml, "Partido.RowVersion");
+
+        var response = await client.PostAsync(
+            editUrl,
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = token,
+                ["Partido.Id"] = partidoId,
+                ["Partido.RowVersion"] = rowVersion,
+                ["Partido.Estado"] = "1", // Jugado
+                ["Partido.PuntosLocal"] = puntosLocal.ToString(),
+                ["Partido.PuntosVisitante"] = puntosVisitante.ToString(),
+            }),
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
     }
 }
