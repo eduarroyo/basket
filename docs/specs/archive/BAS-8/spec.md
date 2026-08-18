@@ -40,7 +40,7 @@ BAS-7 dejó gestionables los `Equipo`. Este incremento añade `Plantilla de equi
 - [x] Dar de alta o editar una ficha con un dorsal ya usado en el mismo equipo muestra un error de validación en español y no guarda el cambio.
 - [x] Dar de baja una ficha exige una confirmación explícita (pantalla de confirmación con los datos de la ficha) antes de borrarla.
 - [x] Existe un test de integración que cubre alta + edición + baja + listado, y un test que verifica el rechazo del dorsal duplicado.
-- [ ] La rama compila y todos los tests (unitarios + integración) pasan en CI.
+- [x] La rama compila y todos los tests (unitarios + integración) pasan en CI.
 
 ## Aclaraciones
 
