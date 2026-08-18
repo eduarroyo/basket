@@ -28,9 +28,22 @@ public class AppHostSqlFixture : IAsyncLifetime
 
     public string ConnectionString { get; private set; } = null!;
 
-    // Cada llamada crea un HttpClient nuevo (con su propio CookieContainer, para no
-    // compartir sesión autenticada entre tests que reutilicen esta misma fixture).
+    // OJO: cada llamada a CreateHttpClient("web") NO da un CookieContainer propio —
+    // IHttpClientFactory reutiliza el mismo HttpMessageHandler (y por tanto el mismo
+    // CookieContainer) entre llamadas al mismo nombre mientras el handler siga vivo
+    // (por defecto, 2 minutos). Confirmado en CI (BAS-6): un test que comprobaba una
+    // petición anónima veía la cookie de sesión de un test de login anterior sobre la
+    // misma fixture, porque ambos "HttpClient" distintos compartían el mismo handler.
+    // Vale para los tests de alta/edición (cada uno hace su propio login al principio,
+    // así que una cookie previa da igual). Para comprobar acceso anónimo de verdad, usar
+    // CreateAnonymousWebHttpClient(), que no pasa por el pool de IHttpClientFactory.
     public HttpClient CreateWebHttpClient() => _app!.CreateHttpClient("web");
+
+    public HttpClient CreateAnonymousWebHttpClient()
+    {
+        var handler = new HttpClientHandler { UseCookies = false };
+        return new HttpClient(handler) { BaseAddress = _app!.GetEndpoint("web", "https") };
+    }
 
     public async ValueTask InitializeAsync()
     {

@@ -43,7 +43,7 @@ public partial class CatalogoAdminPagesTests(AppHostSqlFixture fixture) : IClass
     public async Task PeticionAnonimaATemporadasRedirigeALogin()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
-        using var client = fixture.CreateWebHttpClient();
+        using var client = fixture.CreateAnonymousWebHttpClient();
 
         using var response = await client.GetAsync("/Admin/Temporada", cancellationToken);
 
