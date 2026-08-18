@@ -1,7 +1,7 @@
 ---
 codigo: BAS-5
 titulo: Modelo de datos de dominio
-estado: Planificado
+estado: Archivado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-18
 dependeDe:

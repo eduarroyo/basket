@@ -33,11 +33,6 @@
     <File Path="docs/specs/BAS-4/plan.md" />
     <File Path="docs/specs/BAS-4/tasks.md" />
   </Folder>
-  <Folder Name="/docs/specs/BAS-5/">
-    <File Path="docs/specs/BAS-5/spec.md" />
-    <File Path="docs/specs/BAS-5/plan.md" />
-    <File Path="docs/specs/BAS-5/tasks.md" />
-  </Folder>
   <Folder Name="/docs/specs/archive/" />
   <Folder Name="/docs/specs/archive/BAS-1/">
     <File Path="docs/specs/archive/BAS-1/spec.md" />
@@ -53,6 +48,11 @@
     <File Path="docs/specs/archive/BAS-3/spec.md" />
     <File Path="docs/specs/archive/BAS-3/plan.md" />
     <File Path="docs/specs/archive/BAS-3/tasks.md" />
+  </Folder>
+  <Folder Name="/docs/specs/archive/BAS-5/">
+    <File Path="docs/specs/archive/BAS-5/spec.md" />
+    <File Path="docs/specs/archive/BAS-5/plan.md" />
+    <File Path="docs/specs/archive/BAS-5/tasks.md" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/BasketBaseTracker.Tests/BasketBaseTracker.Tests.csproj" />

@@ -1,6 +1,6 @@
 ---
 codigo: BAS-5
-estado: Planificado
+estado: Archivado
 tags:
   - tasks
 ---
