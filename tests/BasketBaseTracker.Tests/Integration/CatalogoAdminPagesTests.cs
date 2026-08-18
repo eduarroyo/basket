@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using static BasketBaseTracker.Tests.Integration.AdminHttpTestHelpers;
 
 namespace BasketBaseTracker.Tests.Integration;
 
@@ -8,37 +9,8 @@ namespace BasketBaseTracker.Tests.Integration;
 // HttpClient (AppHostSqlFixture.CreateWebHttpClient) gestiona cookies por sí solo
 // (comportamiento por defecto de SocketsHttpHandler), así que la sesión de
 // autenticación se mantiene entre peticiones del mismo test sin nada adicional.
-public partial class CatalogoAdminPagesTests(AppHostSqlFixture fixture) : IClassFixture<AppHostSqlFixture>
+public class CatalogoAdminPagesTests(AppHostSqlFixture fixture) : IClassFixture<AppHostSqlFixture>
 {
-    [GeneratedRegex("""name="__RequestVerificationToken"[^>]*?value="(?<token>[^"]+)"[^>]*>""")]
-    private static partial Regex AntiforgeryTokenRegex();
-
-    private static async Task<string> GetAntiforgeryTokenAsync(HttpResponseMessage response, CancellationToken cancellationToken)
-    {
-        var html = await response.Content.ReadAsStringAsync(cancellationToken);
-        var match = AntiforgeryTokenRegex().Match(html);
-        Assert.True(match.Success, $"No se encontró el token antifalsificación en la respuesta de {response.RequestMessage?.RequestUri}.");
-        return match.Groups["token"].Value;
-    }
-
-    private static async Task LoginAsync(HttpClient client, CancellationToken cancellationToken)
-    {
-        var loginPage = await client.GetAsync("/Admin/Login", cancellationToken);
-        var token = await GetAntiforgeryTokenAsync(loginPage, cancellationToken);
-
-        var response = await client.PostAsync(
-            "/Admin/Login",
-            new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                ["__RequestVerificationToken"] = token,
-                ["Input.Email"] = AppHostSqlFixture.SeedAdminEmail,
-                ["Input.Password"] = AppHostSqlFixture.SeedAdminPassword,
-            }),
-            cancellationToken);
-
-        response.EnsureSuccessStatusCode();
-    }
-
     [Fact]
     public async Task PeticionAnonimaATemporadasRedirigeALogin()
     {
