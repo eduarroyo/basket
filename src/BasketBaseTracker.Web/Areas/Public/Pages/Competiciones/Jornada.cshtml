@@ -1,0 +1,44 @@
+@page "/competiciones/{id:int}/jornadas/{n:int}"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Competiciones
+@model JornadaModel
+@{
+    ViewData["Title"] = Model.Jornada.Etiqueta ?? $"Jornada {Model.Jornada.Numero}";
+}
+
+<h1>@(Model.Jornada.Etiqueta ?? $"Jornada {Model.Jornada.Numero}")</h1>
+<p>@Model.Jornada.Competicion.Temporada.Nombre — @Model.Jornada.Competicion.Categoria.Nombre</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Local</th>
+            <th>Visitante</th>
+            <th>Resultado</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var partido in Model.Partidos)
+{
+        <tr>
+            <td>@partido.EquipoLocal.Nombre</td>
+            <td>@partido.EquipoVisitante.Nombre</td>
+            <td>
+                <a asp-area="Public" asp-page="/Partidos/Index" asp-route-id="@partido.Id">
+                @if (partido.PuntosLocal is not null && partido.PuntosVisitante is not null)
+                {
+                    @($"{partido.PuntosLocal}-{partido.PuntosVisitante}")
+                }
+                else
+                {
+                    @partido.Estado
+                }
+                </a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-area="Public" asp-page="/Competiciones/Calendario" asp-route-id="@Model.Jornada.CompeticionId">Volver al calendario</a>
+</div>
