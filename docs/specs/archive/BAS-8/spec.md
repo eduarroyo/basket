@@ -1,7 +1,7 @@
 ---
 codigo: BAS-8
 titulo: Área Admin — plantilla de equipo (FichaJugador)
-estado: Planificado
+estado: Archivado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-18
 dependeDe:

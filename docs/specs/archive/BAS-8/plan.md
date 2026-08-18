@@ -1,6 +1,6 @@
 ---
 codigo: BAS-8
-estado: Planificado
+estado: Archivado
 tags:
   - plan
 ---
