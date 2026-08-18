@@ -1,0 +1,51 @@
+@page "/equipos/{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Equipos
+@model IndexModel
+@{
+    ViewData["Title"] = Model.Equipo.Nombre;
+}
+
+<h1>@Model.Equipo.Nombre</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Club</dt>
+    <dd class="col-sm-9">
+        <a asp-area="Public" asp-page="/Clubes/Index" asp-route-id="@Model.Equipo.ClubId">@Model.Equipo.Club.Nombre</a>
+    </dd>
+    <dt class="col-sm-3">Sede habitual</dt>
+    <dd class="col-sm-9">
+    @if (Model.Equipo.SedeHabitualId is int sedeHabitualId)
+    {
+        <a asp-area="Public" asp-page="/Sedes/Index" asp-route-id="@sedeHabitualId">@Model.Equipo.SedeHabitual!.Nombre</a>
+    }
+    else
+    {
+        @: —
+    }
+    </dd>
+    <dt class="col-sm-3">Competición</dt>
+    <dd class="col-sm-9">
+        <a asp-area="Public" asp-page="/Temporadas/Competiciones" asp-route-id="@Model.Equipo.Competicion.TemporadaId">
+            @Model.Equipo.Competicion.Temporada.Nombre — @Model.Equipo.Competicion.Categoria.Nombre
+        </a>
+    </dd>
+</dl>
+
+<h2>Plantilla</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Dorsal</th>
+            <th>Posición</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var ficha in Model.Plantilla)
+{
+        <tr>
+            <td>@ficha.Dorsal</td>
+            <td>@(ficha.Posicion?.ToString() ?? "—")</td>
+        </tr>
+}
+    </tbody>
+</table>

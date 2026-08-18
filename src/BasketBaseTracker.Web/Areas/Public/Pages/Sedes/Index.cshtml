@@ -1,0 +1,15 @@
+@page "/sedes/{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Sedes
+@model IndexModel
+@{
+    ViewData["Title"] = Model.Sede.Nombre;
+}
+
+<h1>@Model.Sede.Nombre</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Municipio</dt>
+    <dd class="col-sm-9">@Model.Sede.Municipio</dd>
+    <dt class="col-sm-3">Dirección</dt>
+    <dd class="col-sm-9">@Model.Sede.Direccion</dd>
+</dl>
