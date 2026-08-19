@@ -19,4 +19,4 @@ tags:
 - [~] Verificación manual en navegador (Claude in Chrome): la extensión no estaba conectada en esta sesión, así que no se pudo hacer — cubierto en su lugar por los tests de integración HTTP de `CalendarioAdminPagesTests.cs`, que ejercitan las mismas páginas end-to-end (alta, edición, listado, mensajes de error en español). Pendiente una verificación visual manual antes o después de fusionar, cuando la extensión esté disponible.
 - [x] `dotnet build` + `dotnet test` en verde localmente (29/29, incluye E2E).
 - [x] Actualizar `spec.md` (estado `Completado`, checklist de criterios de aceptación) y mover la carpeta a `docs/specs/archive/BAS-9/`.
-- [ ] Commit, push, PR de `feature/BAS-9` a `develop`; esperar confirmación humana antes de fusionar.
+- [x] Commit, push, PR de `feature/BAS-9` a `develop`; esperar confirmación humana antes de fusionar.
