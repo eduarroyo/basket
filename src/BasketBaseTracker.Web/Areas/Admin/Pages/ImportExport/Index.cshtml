@@ -1,0 +1,71 @@
+@page
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.ImportExport
+@model IndexModel
+@{
+    ViewData["Title"] = "Importación/exportación";
+}
+
+<h1>Importación/exportación</h1>
+<p>
+    Exportación e importación completa de todos los datos del sistema, pensada como backup y vía de migración —
+    no como herramienta de gestión del día a día.
+</p>
+<hr />
+
+@if (Model.MensajeExito is not null)
+{
+    <div class="alert alert-success">@Model.MensajeExito</div>
+}
+
+@if (Model.Errores.Count > 0)
+{
+    <div class="alert alert-danger">
+        <p>No se ha importado nada. Revisa estos errores y vuelve a intentarlo:</p>
+        <ul>
+            @foreach (var error in Model.Errores)
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="row">
+    <div class="col-md-5">
+        <h2>Exportar</h2>
+        <p>Descarga un fichero JSON con todos los datos actuales del sistema.</p>
+        <a asp-page-handler="Exportar" class="btn btn-primary">Exportar</a>
+    </div>
+</div>
+
+<hr />
+
+<div class="row">
+    <div class="col-md-5">
+        <h2>Importar</h2>
+        <p>
+            <strong>Reemplaza por completo</strong> todos los datos actuales por los del fichero — no es una
+            fusión. Se guarda automáticamente una copia de seguridad del estado actual antes de aplicar el
+            cambio.
+        </p>
+        <form method="post" enctype="multipart/form-data" asp-page-handler="Importar">
+            <div class="form-group">
+                <label asp-for="Fichero" class="control-label">Fichero de exportación (JSON)</label>
+                <input asp-for="Fichero" type="file" accept="application/json" class="form-control" />
+            </div>
+            <div class="form-check my-3">
+                <input asp-for="ConfirmoReemplazo" class="form-check-input" />
+                <label asp-for="ConfirmoReemplazo" class="form-check-label">
+                    Entiendo que esto reemplaza todos los datos actuales del sistema
+                </label>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Importar" class="btn btn-danger" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-area="Admin" asp-page="/Index">Volver al panel de administración</a>
+</div>

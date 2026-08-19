@@ -82,8 +82,20 @@ var sql = builder.AddAzureSqlServer("sql")
     });
 var db = sql.AddDatabase("basketbasetracker");
 
+// Backup automático antes de una importación (BAS-16, architecture.md punto 10,
+// ampliado) — emulador Azurite en local/tests, Azure Storage real al publicar,
+// mismo patrón que "sql" más arriba.
+var storage = builder.AddAzureStorage("storage");
+if (!builder.ExecutionContext.IsPublishMode)
+{
+    storage.RunAsEmulator();
+}
+
+var blobs = storage.AddBlobs("blobs");
+
 var web = builder.AddProject<Projects.BasketBaseTracker_Web>("web")
-    .WithExternalHttpEndpoints();
+    .WithExternalHttpEndpoints()
+    .WithReference(blobs);
 
 if (builder.ExecutionContext.IsPublishMode)
 {
@@ -185,6 +197,7 @@ if (builder.ExecutionContext.IsPublishMode)
 else
 {
     web.WithReference(db).WaitFor(db);
+    web.WaitFor(blobs);
 }
 
 // Sin registro de contenedores propio: AddAzureContainerAppEnvironment aprovisiona

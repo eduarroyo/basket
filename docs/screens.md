@@ -54,11 +54,11 @@ Pantallas de solo lectura, candidatas directas a Output Caching.
 | Pantalla | Descripción | Estado |
 | --- | --- | --- |
 | Login | Acceso de administradores | v1 |
-| Importación/exportación | Exportación e importación **completa** de todos los datos del sistema desde un único lugar (no parcial por entidad). Su propósito es servir de backup y de vía de migración a otra plataforma si fuera necesario, no la gestión del día a día. Solo accesible a administradores del sistema. | Placeholder |
-| Usuarios/roles | Alta de administradores; preparado para desglosar en roles más específicos en el futuro (gestor de competiciones, de equipos, de resultados...) | Placeholder |
+| Importación/exportación | Exportación e importación **completa** de todos los datos del sistema desde un único lugar (no parcial por entidad). Su propósito es servir de backup y de vía de migración a otra plataforma si fuera necesario, no la gestión del día a día. Solo accesible al rol `Administrador` (sistema) — ver [[archive/BAS-16/spec\|BAS-16]]. | v1 |
+| Usuarios/roles | Alta de administradores; preparado para desglosar en roles más específicos en el futuro (gestor de equipos, de resultados...) — BAS-16 ya dividió el rol único original en `GestorCompeticion`/`Administrador`, esta pantalla sigue sin interfaz propia (alta manual) | Placeholder |
 
 ## Resumen
 
 - 11 pantallas públicas
-- 14 pantallas admin (11 de v1 + login, y 2 placeholders: importación/exportación y usuarios/roles)
+- 14 pantallas admin (12 de v1 + login, y 1 placeholder: usuarios/roles)
 - Total: ~25 pantallas, todas mapeadas 1:1 al modelo de datos para facilitar el scaffolding de Razor Pages.

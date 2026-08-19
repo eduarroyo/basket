@@ -45,6 +45,16 @@ public class AppHostSqlFixture : IAsyncLifetime
         return new HttpClient(handler) { BaseAddress = _app!.GetEndpoint("web", "https") };
     }
 
+    // Como CreateAnonymousWebHttpClient, pero con su propio CookieContainer
+    // aislado (en vez de sin cookies) — para iniciar sesión con un usuario de
+    // prueba propio sin compartir el handler (y su cookie) con otras llamadas a
+    // CreateWebHttpClient() del pool de IHttpClientFactory (BAS-16).
+    public HttpClient CreateIsolatedWebHttpClient()
+    {
+        var handler = new HttpClientHandler { UseCookies = true, CookieContainer = new System.Net.CookieContainer() };
+        return new HttpClient(handler) { BaseAddress = _app!.GetEndpoint("web", "https") };
+    }
+
     public async ValueTask InitializeAsync()
     {
         var cancellationToken = CancellationToken.None;

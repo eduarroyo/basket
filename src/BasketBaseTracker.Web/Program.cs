@@ -3,6 +3,7 @@ using BasketBaseTracker.Web.Data;
 using BasketBaseTracker.Web.Data.Entities;
 using BasketBaseTracker.Web.Domain;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
@@ -42,6 +43,10 @@ builder.AddSqlServerDbContext<ApplicationDbContext>(
             TimeSpan.FromSeconds(sqlResilience.MaxRetryDelaySeconds),
             errorNumbersToAdd: null)));
 
+// Backup automático antes de una importación (BAS-16) — emulador Azurite en
+// local/tests, Azure Storage real al publicar (AppHost.cs).
+builder.AddAzureBlobServiceClient("blobs");
+
 // Identity: autenticación por cookies, con roles (rol único "Administrador" en v1 —
 // architecture.md punto 7). Sin autorregistro ni confirmación por email, así que se
 // desactiva ese flujo; contraseña más estricta que el valor por defecto de Identity.
@@ -57,11 +62,30 @@ builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Admin/Login";
     options.LogoutPath = "/Admin/Logout";
+
+    // Sin esto, un usuario autenticado sin el rol requerido caía en el
+    // AccessDeniedPath por defecto de Identity ("/Account/AccessDenied", que no
+    // existe en esta app) y veía un 404 en vez de un 403 — nunca se notó hasta
+    // BAS-16, que introduce el primer caso real de "autenticado pero sin el rol
+    // correcto" (antes solo había un único rol, válido para todo el área Admin).
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
 });
 
 builder.Services.AddAuthorization(options =>
 {
+    // "Administrador" = administrador del sistema (import/export, BAS-16);
+    // "GestorCompeticion" = gestión de la competición (resto del área Admin) — antes
+    // un único rol "Administrador", dividido en BAS-16 (architecture.md punto 7).
     options.AddPolicy("Administrador", policy => policy.RequireRole("Administrador"));
+    options.AddPolicy("GestorCompeticion", policy => policy.RequireRole("GestorCompeticion"));
+    // RequireRole con varios roles es "o" (al menos uno) — para el panel de
+    // administración (Admin/Index), la página compartida de aterrizaje tras el
+    // login para ambos tipos de cuenta.
+    options.AddPolicy("GestorCompeticionOAdministrador", policy => policy.RequireRole("GestorCompeticion", "Administrador"));
 });
 
 builder.Services.AddScoped<ClasificacionService>();
@@ -104,12 +128,27 @@ builder.Services.AddRazorPages(options =>
         }
     });
 
-    // El Area "Admin" exige el rol "Administrador" en todas sus páginas, salvo Login
-    // (si no, nadie podría llegar a autenticarse) y Logout (para poder mostrar la
-    // confirmación de cierre de sesión ya sin sesión activa).
-    options.Conventions.AuthorizeAreaFolder("Admin", "/", "Administrador");
+    // El Area "Admin" exige el rol "GestorCompeticion" en todas sus páginas, salvo
+    // Login (si no, nadie podría llegar a autenticarse), Logout (para poder mostrar
+    // la confirmación de cierre de sesión ya sin sesión activa), el panel de
+    // aterrizaje (/Index, compartido por ambos tipos de cuenta tras el login) e
+    // ImportExport, que exige en su lugar el rol "Administrador" (sistema) — BAS-16.
+    // No se puede usar AuthorizeAreaFolder + AuthorizeAreaPage para estas páginas
+    // porque los filtros de autorización se acumulan (AND, no reemplazo): exigiría
+    // varios roles a la vez. Se excluyen de la convención de carpeta con un filtro
+    // propio y se les da su propia política aparte.
+    options.Conventions.AddAreaFolderApplicationModelConvention("Admin", "/", model =>
+    {
+        if (!model.RelativePath.Contains("/ImportExport/", StringComparison.OrdinalIgnoreCase)
+            && !model.RelativePath.EndsWith("/Pages/Index.cshtml", StringComparison.OrdinalIgnoreCase))
+        {
+            model.Filters.Add(new AuthorizeFilter("GestorCompeticion"));
+        }
+    });
     options.Conventions.AllowAnonymousToAreaPage("Admin", "/Login");
     options.Conventions.AllowAnonymousToAreaPage("Admin", "/Logout");
+    options.Conventions.AuthorizeAreaPage("Admin", "/ImportExport/Index", "Administrador");
+    options.Conventions.AuthorizeAreaPage("Admin", "/Index", "GestorCompeticionOAdministrador");
 });
 
 var app = builder.Build();
