@@ -19,4 +19,4 @@ tags:
 - [x] Añadir `docs/specs/BAS-14/spec.md`, `plan.md` y `tasks.md` a `BasketBaseTracker.slnx` (carpeta de solución `/docs/specs/BAS-14/`).
 - [x] Validación manual: importado `calendario.ics` de una competición real en Google Calendar, evento mostrado correctamente (equipos, fecha, duración). Verificación de la mecánica real de suscripción ("Desde URL", auto-actualizable) pendiente de despliegue con URL pública — no es un cambio de código, ver `spec.md`, Aclaraciones.
 - [x] Ejecutar la suite completa (`dotnet test`) y confirmar que pasa en CI.
-- [ ] Cierre: mover `docs/specs/BAS-14/` a `docs/specs/archive/BAS-14/`, actualizar `BasketBaseTracker.slnx` y abrir el PR de `feature/BAS-14` a `develop` (sin fusionar sin confirmación humana).
+- [x] Cierre: mover `docs/specs/BAS-14/` a `docs/specs/archive/BAS-14/`, actualizar `BasketBaseTracker.slnx` y abrir el PR de `feature/BAS-14` a `develop` (sin fusionar sin confirmación humana). Fusionado (PR #23), promocionado a `main` (PR #24) y desplegado a producción — validado en vivo con Google Calendar.

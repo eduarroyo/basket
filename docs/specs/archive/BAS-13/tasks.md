@@ -19,4 +19,4 @@ tags:
 - [~] Verificación manual en navegador (Claude in Chrome): la extensión no estaba conectada en esta sesión, y el entorno local de `aspire run` sigue con el problema de contraseña de `sa` desincronizada (hallazgo de BAS-12, sin resolver). Cubierto en su lugar por los tests de integración HTTP, que ejercitan las mismas páginas end-to-end contra SQL efímero.
 - [x] `dotnet build` + `dotnet test` en verde localmente (74/74, incluye E2E).
 - [x] Actualizar `spec.md` (estado `Completado`, checklist de criterios de aceptación) y mover la carpeta a `docs/specs/archive/BAS-13/`.
-- [ ] Commit, push, PR de `feature/BAS-13` a `develop`; esperar confirmación humana antes de fusionar.
+- [x] Commit, push, PR de `feature/BAS-13` a `develop`; esperar confirmación humana antes de fusionar.
