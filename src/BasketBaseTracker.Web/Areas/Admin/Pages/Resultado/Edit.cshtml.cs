@@ -22,6 +22,15 @@ public class EditModel(ApplicationDbContext context) : PageModel
     [BindProperty]
     public Partido Partido { get; set; } = null!;
 
+    // Atajos de relleno del marcador (BAS-15) — la suma de parciales se calcula
+    // una vez al cargar la página y se pasa al botón como datos, sin necesidad de
+    // AJAX (los parciales no se editan en esta misma pantalla).
+    public int SumaPuntosLocal { get; set; }
+
+    public int SumaPuntosVisitante { get; set; }
+
+    public bool TieneParciales { get; set; }
+
     public async Task<IActionResult> OnGetAsync(int id)
     {
         var partido = await CargarPartidoAsync(id);
@@ -33,6 +42,7 @@ public class EditModel(ApplicationDbContext context) : PageModel
         PartidoContexto = partido;
         Partido = partido;
         CargarDesplegables(partido);
+        await CargarSumaParcialesAsync(id);
         return Page();
     }
 
@@ -65,6 +75,7 @@ public class EditModel(ApplicationDbContext context) : PageModel
         if (!ModelState.IsValid)
         {
             CargarDesplegables(partidoExistente);
+            await CargarSumaParcialesAsync(id);
             return Page();
         }
 
@@ -91,6 +102,7 @@ public class EditModel(ApplicationDbContext context) : PageModel
         {
             ModelState.AddModelError(string.Empty, ConflictoDeConcurrenciaMensaje);
             CargarDesplegables(partidoExistente);
+            await CargarSumaParcialesAsync(id);
             return Page();
         }
 
@@ -107,5 +119,17 @@ public class EditModel(ApplicationDbContext context) : PageModel
     {
         List<Equipo> equipos = [partido.EquipoLocal, partido.EquipoVisitante];
         ViewData["EquipoGanadorResolucionId"] = new SelectList(equipos, "Id", "Nombre", Partido.EquipoGanadorResolucionId);
+    }
+
+    private async Task CargarSumaParcialesAsync(int partidoId)
+    {
+        var parciales = await context.PartidosParciales
+            .Where(p => p.PartidoId == partidoId)
+            .Select(p => new { p.PuntosLocal, p.PuntosVisitante })
+            .ToListAsync();
+
+        (SumaPuntosLocal, SumaPuntosVisitante) = ResultadoReglas.SumarParciales(
+            parciales.Select(p => (p.PuntosLocal, p.PuntosVisitante)));
+        TieneParciales = parciales.Count > 0;
     }
 }

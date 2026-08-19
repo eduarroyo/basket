@@ -84,4 +84,34 @@ public class ResultadoReglasTests
 
         Assert.Equal((0, 2), resultado);
     }
+
+    [Fact]
+    public void SumarParciales_SumaTodosLosPeriodos()
+    {
+        (int, int)[] parciales = [(20, 18), (22, 20), (18, 19), (15, 17)];
+
+        var resultado = ResultadoReglas.SumarParciales(parciales);
+
+        Assert.Equal((75, 74), resultado);
+    }
+
+    [Fact]
+    public void SumarParciales_SinParciales_DevuelveCero()
+    {
+        var resultado = ResultadoReglas.SumarParciales([]);
+
+        Assert.Equal((0, 0), resultado);
+    }
+
+    [Fact]
+    public void SumarParciales_IncluyeProrrogaSinTratamientoEspecial()
+    {
+        // Periodos 1-4 más una prórroga (NumeroPeriodo 5) — se suman igual,
+        // sin distinguir prórroga de tiempo reglamentario (spec.md).
+        (int, int)[] parciales = [(20, 18), (22, 20), (18, 19), (15, 17), (8, 6)];
+
+        var resultado = ResultadoReglas.SumarParciales(parciales);
+
+        Assert.Equal((83, 80), resultado);
+    }
 }
