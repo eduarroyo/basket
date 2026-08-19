@@ -137,6 +137,25 @@ jobs:
             --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
             --revision-weight "${REVISION_NAME}=100"
 
+      # El modo "Multiple" (necesario para el patrón de promoción de tráfico de
+      # arriba) no desactiva solo las revisiones antiguas al perder el tráfico —
+      # se quedan "Active" indefinidamente, cada una con su propia réplica mínima
+      # corriendo sin ningún propósito (coste sin motivo, detectado tras acumular
+      # 8 revisiones activas simultáneas). Se desactiva aquí todo lo que no sea la
+      # revisión recién promocionada; una revisión desactivada se puede reactivar
+      # con "az containerapp revision activate" si hiciera falta un rollback.
+      - name: Desactivar revisiones anteriores sin tráfico
+        env:
+          REVISION_NAME: ${{ steps.new-revision.outputs.name }}
+        run: |
+          OTHER_REVISIONS=$(az containerapp revision list \
+            --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
+            --query "[?name!='${REVISION_NAME}' && properties.active].name" -o tsv)
+          for REV in $OTHER_REVISIONS; do
+            az containerapp revision deactivate \
+              --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" --revision "$REV"
+          done
+
       - name: Cerrar el firewall temporal de Azure SQL
         if: always()
         run: |
