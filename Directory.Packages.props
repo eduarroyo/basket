@@ -6,10 +6,12 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Aspire.Azure.Security.KeyVault" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Azure.Storage.Blobs" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Azure.AppContainers" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Azure.ApplicationInsights" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Azure.KeyVault" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Azure.Sql" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Azure.Storage" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.SqlServer" Version="13.4.6" />
     <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
     <PackageVersion Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="13.4.6" />
