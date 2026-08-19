@@ -1,0 +1,47 @@
+@page "{jornadaId:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.Partidos
+@model IndexModel
+@{
+    ViewData["Title"] = $"Partidos de la jornada {Model.Jornada.Numero}";
+}
+
+<h1>Partidos de @(Model.Jornada.Etiqueta ?? $"la jornada {Model.Jornada.Numero}")</h1>
+<p>@Model.Jornada.Competicion.Temporada.Nombre — @Model.Jornada.Competicion.Categoria.Nombre</p>
+
+<p>
+    <a asp-page="Create" asp-route-jornadaId="@Model.Jornada.Id" class="btn btn-primary">Nuevo partido</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Local</th>
+            <th>Visitante</th>
+            <th>Sede</th>
+            <th>Fecha y hora</th>
+            <th>Estado</th>
+            <th>Marcador</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Partidos)
+{
+        <tr>
+            <td>@item.EquipoLocal.Nombre</td>
+            <td>@item.EquipoVisitante.Nombre</td>
+            <td>@(item.Sede?.Nombre ?? "—")</td>
+            <td>@(item.FechaHora?.ToString("dd/MM/yyyy HH:mm") ?? "Aún no programado")</td>
+            <td>@item.Estado</td>
+            <td>@(item.PuntosLocal is not null && item.PuntosVisitante is not null ? $"{item.PuntosLocal}-{item.PuntosVisitante}" : "—")</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-area="Admin" asp-page="/Resultado/Edit" asp-route-id="@item.Id">Resultado</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-area="Admin" asp-page="/Jornada/Index" asp-route-competicionId="@Model.Jornada.CompeticionId">Volver al calendario</a>
+</div>

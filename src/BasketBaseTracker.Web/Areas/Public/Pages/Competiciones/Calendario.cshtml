@@ -1,0 +1,50 @@
+@page "/competiciones/{id:int}/calendario"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Competiciones
+@model CalendarioModel
+@{
+    ViewData["Title"] = $"Calendario de {Model.Competicion.Temporada.Nombre} — {Model.Competicion.Categoria.Nombre}";
+}
+
+<h1>Calendario de @Model.Competicion.Temporada.Nombre — @Model.Competicion.Categoria.Nombre</h1>
+
+<p>
+    <a href="/competiciones/@Model.Competicion.Id/calendario.ics">Añadir a mi calendario</a>
+</p>
+
+@foreach (var jornada in Model.Jornadas)
+{
+    <h2>
+        <a asp-area="Public" asp-page="/Competiciones/Jornada" asp-route-id="@Model.Competicion.Id" asp-route-n="@jornada.Numero">
+            @(jornada.Etiqueta ?? $"Jornada {jornada.Numero}")
+        </a>
+    </h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Local</th>
+                <th>Visitante</th>
+                <th>Sede</th>
+                <th>Fecha y hora</th>
+                <th>Estado</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var partido in Model.PartidosPorJornada.GetValueOrDefault(jornada.Id, []))
+        {
+            <tr>
+                <td>@partido.EquipoLocal.Nombre</td>
+                <td>@partido.EquipoVisitante.Nombre</td>
+                <td>@(partido.Sede?.Nombre ?? "—")</td>
+                <td>@(partido.FechaHora?.ToString("dd/MM/yyyy HH:mm") ?? "Sin programar")</td>
+                <td>
+                    <a asp-area="Public" asp-page="/Partidos/Index" asp-route-id="@partido.Id">@partido.Estado</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+<div>
+    <a asp-area="Public" asp-page="/Temporadas/Competiciones" asp-route-id="@Model.Competicion.TemporadaId">Volver a competiciones</a>
+</div>

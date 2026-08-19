@@ -1,0 +1,47 @@
+@page "/equipos/{id:int}/resultados"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Equipos
+@model ResultadosModel
+@{
+    ViewData["Title"] = $"Resultados de {Model.Equipo.Nombre}";
+}
+
+<h1>Resultados de @Model.Equipo.Nombre</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Rival</th>
+            <th>Local/Visitante</th>
+            <th>Fecha</th>
+            <th>Resultado</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var partido in Model.Partidos)
+{
+    var esLocal = partido.EquipoLocalId == Model.Equipo.Id;
+    var rival = esLocal ? partido.EquipoVisitante : partido.EquipoLocal;
+        <tr>
+            <td>@rival.Nombre</td>
+            <td>@(esLocal ? "Local" : "Visitante")</td>
+            <td>@(partido.FechaHora?.ToString("dd/MM/yyyy HH:mm") ?? "Sin programar")</td>
+            <td>
+                <a asp-area="Public" asp-page="/Partidos/Index" asp-route-id="@partido.Id">
+                @if (partido.PuntosLocal is not null && partido.PuntosVisitante is not null)
+                {
+                    @($"{partido.PuntosLocal}-{partido.PuntosVisitante}")
+                }
+                else
+                {
+                    @partido.Estado
+                }
+                </a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-area="Public" asp-page="/Equipos/Index" asp-route-id="@Model.Equipo.Id">Volver a la ficha del equipo</a>
+</div>

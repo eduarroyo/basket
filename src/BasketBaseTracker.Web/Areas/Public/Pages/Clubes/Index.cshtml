@@ -1,0 +1,33 @@
+@page "/clubes/{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Clubes
+@model IndexModel
+@{
+    ViewData["Title"] = Model.Club.Nombre;
+}
+
+<h1>@Model.Club.Nombre</h1>
+
+<dl class="row">
+    <dt class="col-sm-3">Municipio</dt>
+    <dd class="col-sm-9">@Model.Club.Municipio</dd>
+    <dt class="col-sm-3">Fecha de alta</dt>
+    <dd class="col-sm-9">@Model.Club.FechaAlta.ToString("dd/MM/yyyy")</dd>
+</dl>
+
+<h2>Equipos de la temporada actual</h2>
+@if (Model.EquiposTemporadaActual.Count == 0)
+{
+    <p>No hay ninguna temporada en curso ahora mismo.</p>
+}
+else
+{
+    <ul class="list-group">
+    @foreach (var equipo in Model.EquiposTemporadaActual)
+    {
+        <li class="list-group-item">
+            <a asp-area="Public" asp-page="/Equipos/Index" asp-route-id="@equipo.Id">@equipo.Nombre</a>
+            — @equipo.Competicion.Categoria.Nombre
+        </li>
+    }
+    </ul>
+}

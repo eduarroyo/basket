@@ -290,7 +290,8 @@ namespace BasketBaseTracker.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PartidoId");
+                    b.HasIndex("PartidoId", "NumeroPeriodo")
+                        .IsUnique();
 
                     b.ToTable("PartidosParciales");
                 });

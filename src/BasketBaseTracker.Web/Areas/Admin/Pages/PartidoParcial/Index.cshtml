@@ -1,0 +1,40 @@
+@page "{partidoId:int}"
+@namespace BasketBaseTracker.Web.Areas.Admin.Pages.PartidosParciales
+@model IndexModel
+@{
+    ViewData["Title"] = "Parciales";
+}
+
+<h1>Parciales — @Model.Partido.EquipoLocal.Nombre vs. @Model.Partido.EquipoVisitante.Nombre</h1>
+
+<p>
+    <a asp-page="Create" asp-route-partidoId="@Model.Partido.Id" class="btn btn-primary">Nuevo parcial</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Periodo</th>
+            <th>Puntos local</th>
+            <th>Puntos visitante</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Parciales)
+{
+        <tr>
+            <td>@item.NumeroPeriodo</td>
+            <td>@item.PuntosLocal</td>
+            <td>@item.PuntosVisitante</td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.Id">Editar</a> |
+                <a asp-page="./Delete" asp-route-id="@item.Id">Baja</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
+
+<div>
+    <a asp-area="Admin" asp-page="/Resultado/Edit" asp-route-id="@Model.Partido.Id">Volver al resultado</a>
+</div>

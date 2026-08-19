@@ -1,0 +1,29 @@
+@page "/temporadas/{id:int}/competiciones"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Temporadas
+@model CompeticionesModel
+@{
+    ViewData["Title"] = $"Competiciones de {Model.Temporada.Nombre}";
+}
+
+<h1>Competiciones de @Model.Temporada.Nombre</h1>
+
+@foreach (var competicion in Model.Competiciones)
+{
+    <h2>@competicion.Categoria.Nombre</h2>
+    <p>
+        <a asp-area="Public" asp-page="/Competiciones/Calendario" asp-route-id="@competicion.Id">Calendario</a>
+        · <a asp-area="Public" asp-page="/Competiciones/Clasificacion" asp-route-id="@competicion.Id">Ver clasificación</a>
+    </p>
+    <ul class="list-group mb-4">
+    @foreach (var equipo in Model.EquiposPorCompeticion.GetValueOrDefault(competicion.Id, []))
+    {
+        <li class="list-group-item">
+            <a asp-area="Public" asp-page="/Equipos/Index" asp-route-id="@equipo.Id">@equipo.Nombre</a>
+        </li>
+    }
+    </ul>
+}
+
+<div>
+    <a asp-area="Public" asp-page="/Index">Volver a la portada</a>
+</div>
