@@ -31,6 +31,15 @@
                     <input asp-for="Partido.PuntosVisitante" class="form-control" />
                     <span asp-validation-for="Partido.PuntosVisitante" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <button type="button" id="btnTecnicaLocal" class="btn btn-outline-secondary btn-sm">Victoria técnica local (2-0)</button>
+                    <button type="button" id="btnTecnicaVisitante" class="btn btn-outline-secondary btn-sm">Victoria técnica visitante (0-2)</button>
+                    <button type="button" id="btnCalcularParciales" class="btn btn-outline-secondary btn-sm"
+                            data-suma-local="@Model.SumaPuntosLocal" data-suma-visitante="@Model.SumaPuntosVisitante"
+                            disabled="@(Model.TieneParciales ? null : "disabled")">
+                        Calcular desde los parciales
+                    </button>
+                </div>
             </div>
 
             <div id="grupoResolucion">
@@ -43,7 +52,8 @@
                 </div>
                 <div class="form-group">
                     <label asp-for="Partido.EquipoGanadorResolucionId" class="control-label"></label>
-                    <select asp-for="Partido.EquipoGanadorResolucionId" id="ganadorSelect" class="form-control" asp-items="ViewBag.EquipoGanadorResolucionId" data-equipo-local-id="@Model.PartidoContexto.EquipoLocalId">
+                    <select asp-for="Partido.EquipoGanadorResolucionId" id="ganadorSelect" class="form-control" asp-items="ViewBag.EquipoGanadorResolucionId"
+                            data-equipo-local-id="@Model.PartidoContexto.EquipoLocalId" data-equipo-visitante-id="@Model.PartidoContexto.EquipoVisitanteId">
                         <option value="">-- Sin ganador --</option>
                     </select>
                     <span asp-validation-for="Partido.EquipoGanadorResolucionId" class="text-danger"></span>
@@ -77,9 +87,21 @@
             var ganadorSelect = document.getElementById('ganadorSelect');
             var puntosLocal = document.getElementById('Partido_PuntosLocal');
             var puntosVisitante = document.getElementById('Partido_PuntosVisitante');
+            var btnTecnicaLocal = document.getElementById('btnTecnicaLocal');
+            var btnTecnicaVisitante = document.getElementById('btnTecnicaVisitante');
+            var btnCalcularParciales = document.getElementById('btnCalcularParciales');
+
+            // El valor de <option> de Html.GetEnumSelectList es el entero
+            // subyacente del enum ("1", no "Jugado"), así que comparar por
+            // nombre exige leer el texto de la opción seleccionada, no
+            // estadoSelect.value — bug preexistente encontrado en BAS-15
+            // (grupoMarcador nunca llegaba a mostrarse).
+            function estadoSeleccionadoTexto() {
+                return estadoSelect.options[estadoSelect.selectedIndex].text;
+            }
 
             function actualizarVisibilidad() {
-                var estado = estadoSelect.value;
+                var estado = estadoSeleccionadoTexto();
                 var requiereMarcador = estado === 'Jugado' || estado === 'Resuelto';
                 grupoMarcador.style.display = requiereMarcador ? '' : 'none';
                 grupoResolucion.style.display = estado === 'Resuelto' ? '' : 'none';
@@ -88,13 +110,34 @@
             estadoSelect.addEventListener('change', actualizarVisibilidad);
             actualizarVisibilidad();
 
-            ganadorSelect.addEventListener('change', function () {
-                if (!this.value) {
-                    return;
+            // Los botones de marcador fijan también el ganador cuando el resultado
+            // lo determina; cambiar el ganador a mano después ya NO reescribe el
+            // marcador (relación de un solo sentido — BAS-15, a diferencia del
+            // autorrelleno inverso que había antes).
+            function rellenarMarcador(local, visitante, ganadorId) {
+                puntosLocal.value = local;
+                puntosVisitante.value = visitante;
+                ganadorSelect.value = ganadorId || '';
+            }
+
+            btnTecnicaLocal.addEventListener('click', function () {
+                rellenarMarcador(2, 0, ganadorSelect.dataset.equipoLocalId);
+            });
+
+            btnTecnicaVisitante.addEventListener('click', function () {
+                rellenarMarcador(0, 2, ganadorSelect.dataset.equipoVisitanteId);
+            });
+
+            btnCalcularParciales.addEventListener('click', function () {
+                var sumaLocal = parseInt(this.dataset.sumaLocal, 10);
+                var sumaVisitante = parseInt(this.dataset.sumaVisitante, 10);
+                var ganadorId = null;
+                if (sumaLocal > sumaVisitante) {
+                    ganadorId = ganadorSelect.dataset.equipoLocalId;
+                } else if (sumaVisitante > sumaLocal) {
+                    ganadorId = ganadorSelect.dataset.equipoVisitanteId;
                 }
-                var esLocal = this.value === this.dataset.equipoLocalId;
-                puntosLocal.value = esLocal ? 2 : 0;
-                puntosVisitante.value = esLocal ? 0 : 2;
+                rellenarMarcador(sumaLocal, sumaVisitante, ganadorId);
             });
         })();
     </script>
