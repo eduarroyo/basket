@@ -221,4 +221,32 @@ public static partial class AdminHttpTestHelpers
             cancellationToken);
         response.EnsureSuccessStatusCode();
     }
+
+    // Nuevo en BAS-13: resuelve administrativamente un partido (motivo + equipo
+    // ganador), vía /Admin/Resultado/Edit (BAS-10).
+    public static async Task MarcarPartidoResueltoAsync(
+        HttpClient client, string partidoId, string equipoGanadorId, int puntosLocal, int puntosVisitante, CancellationToken cancellationToken)
+    {
+        var editUrl = $"/Admin/Resultado/Edit/{partidoId}";
+        var editPage = await client.GetAsync(editUrl, cancellationToken);
+        var editHtml = await editPage.Content.ReadAsStringAsync(cancellationToken);
+        var token = await GetAntiforgeryTokenAsync(editPage, cancellationToken);
+        var rowVersion = ExtraerCampoOculto(editHtml, "Partido.RowVersion");
+
+        var response = await client.PostAsync(
+            editUrl,
+            new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                ["__RequestVerificationToken"] = token,
+                ["Partido.Id"] = partidoId,
+                ["Partido.RowVersion"] = rowVersion,
+                ["Partido.Estado"] = "4", // Resuelto
+                ["Partido.MotivoResolucion"] = "0", // Incomparecencia
+                ["Partido.EquipoGanadorResolucionId"] = equipoGanadorId,
+                ["Partido.PuntosLocal"] = puntosLocal.ToString(),
+                ["Partido.PuntosVisitante"] = puntosVisitante.ToString(),
+            }),
+            cancellationToken);
+        response.EnsureSuccessStatusCode();
+    }
 }

@@ -1,0 +1,89 @@
+@page "/partidos/{id:int}"
+@namespace BasketBaseTracker.Web.Areas.Public.Pages.Partidos
+@using BasketBaseTracker.Web.Data.Entities
+@model IndexModel
+@{
+    ViewData["Title"] = $"{Model.Partido.EquipoLocal.Nombre} vs. {Model.Partido.EquipoVisitante.Nombre}";
+}
+
+<h1>@Model.Partido.EquipoLocal.Nombre vs. @Model.Partido.EquipoVisitante.Nombre</h1>
+<p>
+    @Model.Partido.Jornada.Competicion.Temporada.Nombre — @Model.Partido.Jornada.Competicion.Categoria.Nombre
+    — @(Model.Partido.Jornada.Etiqueta ?? $"Jornada {Model.Partido.Jornada.Numero}")
+</p>
+
+<dl class="row">
+    <dt class="col-sm-3">Local</dt>
+    <dd class="col-sm-9">
+        <a asp-area="Public" asp-page="/Equipos/Index" asp-route-id="@Model.Partido.EquipoLocalId">@Model.Partido.EquipoLocal.Nombre</a>
+    </dd>
+    <dt class="col-sm-3">Visitante</dt>
+    <dd class="col-sm-9">
+        <a asp-area="Public" asp-page="/Equipos/Index" asp-route-id="@Model.Partido.EquipoVisitanteId">@Model.Partido.EquipoVisitante.Nombre</a>
+    </dd>
+    <dt class="col-sm-3">Sede</dt>
+    <dd class="col-sm-9">
+    @if (Model.Partido.SedeId is int sedeId)
+    {
+        <a asp-area="Public" asp-page="/Sedes/Index" asp-route-id="@sedeId">@Model.Partido.Sede!.Nombre</a>
+    }
+    else
+    {
+        @: —
+    }
+    </dd>
+    <dt class="col-sm-3">Fecha y hora</dt>
+    <dd class="col-sm-9">@(Model.Partido.FechaHora?.ToString("dd/MM/yyyy HH:mm") ?? "Sin programar")</dd>
+    <dt class="col-sm-3">Estado</dt>
+    <dd class="col-sm-9">@Model.Partido.Estado</dd>
+    <dt class="col-sm-3">Marcador</dt>
+    <dd class="col-sm-9">
+    @if (Model.Partido.PuntosLocal is not null && Model.Partido.PuntosVisitante is not null)
+    {
+        @($"{Model.Partido.PuntosLocal}-{Model.Partido.PuntosVisitante}")
+    }
+    else
+    {
+        @: —
+    }
+    </dd>
+@if (Model.Partido.Estado == PartidoEstado.Resuelto)
+{
+    <dt class="col-sm-3">Motivo de la resolución</dt>
+    <dd class="col-sm-9">@Model.Partido.MotivoResolucion</dd>
+    <dt class="col-sm-3">Equipo ganador</dt>
+    <dd class="col-sm-9">@Model.Partido.EquipoGanadorResolucion?.Nombre</dd>
+}
+</dl>
+
+<h2>Parciales</h2>
+@if (Model.Parciales.Count == 0)
+{
+    <p>Sin parciales registrados.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Periodo</th>
+                <th>Puntos local</th>
+                <th>Puntos visitante</th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var parcial in Model.Parciales)
+    {
+            <tr>
+                <td>@parcial.NumeroPeriodo</td>
+                <td>@parcial.PuntosLocal</td>
+                <td>@parcial.PuntosVisitante</td>
+            </tr>
+    }
+        </tbody>
+    </table>
+}
+
+<div>
+    <a asp-area="Public" asp-page="/Competiciones/Jornada" asp-route-id="@Model.Partido.Jornada.CompeticionId" asp-route-n="@Model.Partido.Jornada.Numero">Volver a la jornada</a>
+</div>

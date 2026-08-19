@@ -11,7 +11,8 @@
 {
     <h2>@competicion.Categoria.Nombre</h2>
     <p>
-        <a asp-area="Public" asp-page="/Competiciones/Clasificacion" asp-route-id="@competicion.Id">Ver clasificación</a>
+        <a asp-area="Public" asp-page="/Competiciones/Calendario" asp-route-id="@competicion.Id">Calendario</a>
+        · <a asp-area="Public" asp-page="/Competiciones/Clasificacion" asp-route-id="@competicion.Id">Ver clasificación</a>
     </p>
     <ul class="list-group mb-4">
     @foreach (var equipo in Model.EquiposPorCompeticion.GetValueOrDefault(competicion.Id, []))
