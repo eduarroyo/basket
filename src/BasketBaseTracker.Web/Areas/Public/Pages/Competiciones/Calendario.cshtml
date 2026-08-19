@@ -7,6 +7,10 @@
 
 <h1>Calendario de @Model.Competicion.Temporada.Nombre — @Model.Competicion.Categoria.Nombre</h1>
 
+<p>
+    <a href="/competiciones/@Model.Competicion.Id/calendario.ics">Añadir a mi calendario</a>
+</p>
+
 @foreach (var jornada in Model.Jornadas)
 {
     <h2>
