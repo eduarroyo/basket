@@ -96,6 +96,8 @@ if (builder.ExecutionContext.IsPublishMode)
     web.PublishAsAzureContainerApp((infra, containerApp) =>
     {
         containerApp.Configuration.ActiveRevisionsMode = ContainerAppActiveRevisionsMode.Multiple;
+        containerApp.Template.Scale.MinReplicas = 1;
+        containerApp.Template.Scale.MaxReplicas = 2;
     });
 }
 
