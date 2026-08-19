@@ -60,6 +60,26 @@ Para crear una migración nueva (en cualquier entorno, no depende de development
 dotnet ef migrations add <Nombre> --project src/BasketBaseTracker.Web
 ```
 
+### Datos de demostración
+
+`src/BasketBaseTracker.Seed` es un comando de consola separado (nunca se ejecuta al arrancar `Web`) que puebla la base de datos con un dataset de demostración completo: varias temporadas de histórico, clubes/equipos/jugadores y una temporada en curso a medio disputar (`docs/specs/archive/BAS-17/spec.md`).
+
+1. Con `aspire run`/`aspire start` levantado (el contenedor local de SQL Server escucha siempre en el puerto fijo `1433`, ver skill `dotnet`), averiguar la contraseña de `sa` del contenedor:
+   ```bash
+   docker inspect <contenedor-sql> --format '{{range .Config.Env}}{{println .}}{{end}}'   # variable MSSQL_SA_PASSWORD
+   ```
+2. Configurar la cadena de conexión una vez, vía `user-secrets` propios de este proyecto (no comparte los secretos de `Web`):
+   ```bash
+   dotnet user-secrets set "ConnectionStrings:basketbasetracker" "Server=127.0.0.1,1433;Database=basketbasetracker;User Id=sa;Password=<...>;TrustServerCertificate=True;" --project src/BasketBaseTracker.Seed
+   ```
+3. Ejecutar el comando (falla si ya hay datos de competición, salvo que se indique `--reset`; `--reset` exige además `--confirmar BORRAR` como salvaguarda explícita):
+   ```bash
+   dotnet run --project src/BasketBaseTracker.Seed -- --temporadas 3 --clubes 10
+   dotnet run --project src/BasketBaseTracker.Seed -- --temporadas 3 --clubes 10 --reset --confirmar BORRAR
+   ```
+
+Contra producción, el mismo comando se dispara como workflow manual de GitHub Actions (`workflow_dispatch`, `.github/workflows/seed-demo.yml`) — nunca a mano desde un puesto local, dado que no existe un entorno de `staging` separado (`docs/architecture.md`, punto 13).
+
 ### Configuración
 
 Resiliencia de `ApplicationDbContext` ante fallos transitorios de Azure SQL (auto-resume del tier Serverless, *throttling*, failover — `docs/specs/BAS-3/spec.md`). Se leen de `IConfiguration` bajo la sección `Sql:Resilience` (`appsettings.json`/`appsettings.{Environment}.json`, o la variable de entorno equivalente con `__` en vez de `:`, p. ej. `Sql__Resilience__MaxRetryCount`):

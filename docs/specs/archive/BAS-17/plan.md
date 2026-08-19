@@ -1,6 +1,6 @@
 ---
 codigo: BAS-17
-estado: Planificado
+estado: Completado
 tags:
   - plan
 ---
@@ -53,7 +53,9 @@ Para cada `Partido` en `Estado = Jugado`: se genera un resultado plausible (rang
 
 ### 7. Conexión a base de datos y credenciales
 
-Reutiliza el login de aplicación de bajo privilegio (`basketbasetracker_app`: lectura/escritura, sin DDL — `architecture.md` punto 6) en vez del login `sqladmin`, porque el seeding solo hace inserts/deletes de datos, nunca DDL. En local, cadena de conexión vía `dotnet user-secrets` (mismo mecanismo que `Seed:AdminEmail`/`Seed:AdminPassword` de `IdentitySeeder`, ver skill `dotnet`); en el workflow de GitHub Actions, el secreto ya existente en Key Vault para ese login (el mismo que usa `Web` en producción).
+Reutiliza el login de aplicación de bajo privilegio (`basketbasetracker_app`: lectura/escritura, sin DDL — `architecture.md` punto 6) en vez del login `sqladmin`, porque el seeding solo hace inserts/deletes de datos, nunca DDL. En local, cadena de conexión vía `dotnet user-secrets` (secretos propios de `BasketBaseTracker.Seed`, no compartidos con `Web`).
+
+**Corrección durante la implementación**: este punto asumía que la contraseña de `basketbasetracker_app` ya estaba en Key Vault como secreto, igual que `Seed:AdminEmail`/`Seed:AdminPassword`. Revisando `AppHost.cs` no es así — es un `builder.AddParameter("sql-app-password", secret: true)` que Aspire resuelve en tiempo de `aspire deploy`, sin que exista ningún `kv.AddSecret` para él; `Web` en producción recibe la cadena de conexión ya resuelta como variable de entorno del Container App (`ConnectionStrings__basketbasetracker`), no la vuelve a leer de ningún sitio. No hay ningún mecanismo ya existente en este repositorio para que un workflow de GitHub Actions obtenga ese valor en texto plano. En vez de investigar cómo extraerlo de la infraestructura de Aspire/Container Apps (superficie no documentada, y innecesaria), se reutiliza el patrón que `deploy.yml` ya tiene, probado, para el login `sqladmin`: un secreto de repositorio de GitHub (`secrets.AZURE_SQL_ADMIN_PASSWORD`). Se añade uno nuevo, `AZURE_SQL_APP_PASSWORD`, con el mismo valor que el parámetro Aspire `sql-app-password` — configurarlo a mano en GitHub (Settings → Secrets) es un paso fuera del control de versiones, igual que el resto de secretos de este repositorio.
 
 ### 8. Workflow de GitHub Actions
 
@@ -62,8 +64,8 @@ Nuevo fichero `.github/workflows/seed-demo.yml`, disparado solo por `workflow_di
 1. Checkout + `setup-dotnet` (mismo `global.json`).
 2. `azure/login` por OIDC (mismos `vars.AZURE_*` ya configurados).
 3. Abrir regla de firewall temporal en Azure SQL para la IP del runner (`az sql server firewall-rule create`, nombre único por `github.run_id`, igual que `deploy.yml`).
-4. Leer la cadena de conexión del login `basketbasetracker_app` desde Key Vault.
-5. `dotnet restore` + `dotnet run --project src/BasketBaseTracker.Seed -- --temporadas <n> --clubes <n> [--reset]`, con la cadena de conexión por variable de entorno.
+4. Construir la cadena de conexión del login `basketbasetracker_app` a partir del secreto de repositorio `AZURE_SQL_APP_PASSWORD` (ver corrección en la decisión técnica 7).
+5. `dotnet restore` + `dotnet run --project src/BasketBaseTracker.Seed -- --temporadas <n> --clubes <n> [--reset --confirmar BORRAR]`, con la cadena de conexión por variable de entorno.
 6. Cerrar la regla de firewall temporal (`if: always()`, igual que `deploy.yml`).
 
 Sin ningún recurso de Azure nuevo (nada de Azure Functions ni Storage Account) — coherente con la aclaración ya cerrada en `spec.md`.

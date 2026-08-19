@@ -1,7 +1,7 @@
 ---
 codigo: BAS-17
 titulo: Datos de demostración (seed multi-temporada)
-estado: Planificado
+estado: Completado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-19
 tags:
@@ -40,14 +40,14 @@ La alternativa elegida es un **comando de seeding explícito, separado del arran
 
 ## Criterios de aceptación
 
-- [ ] Ejecutar el comando de seeding contra una base de datos vacía puebla `Categoria`, `Sede`, `Club`, varias `Temporada`, `Competicion`, `Equipo`, `FichaJugador`, `Jornada` y `Partido`.
-- [ ] Existe al menos una `Temporada` en estado `Finalizada` o `Archivada` con todos sus partidos en estado `Jugado` y resultado (incluidos `PartidoParcial`).
-- [ ] Existe una `Temporada` en estado `EnCurso` con una mezcla de partidos `Jugado` (con resultado y parciales) y `Programado` (con fecha futura, sin resultado).
-- [ ] En ninguna `Jornada` generada aparece el mismo `Equipo` dos veces (ni como local ni como visitante).
-- [ ] El comando de seeding no se ejecuta como parte del arranque normal de `BasketBaseTracker.Web` — solo se dispara explícitamente.
-- [ ] El comando incluye una salvaguarda explícita que impide (o exige confirmación reforzada) ejecutarlo contra la base de datos de producción.
-- [ ] Existe un workflow de GitHub Actions (`workflow_dispatch`, con inputs para nº de temporadas, nº de clubes y si se borran los datos existentes) que ejecuta el seeding contra Azure SQL, reutilizando el patrón de firewall temporal de `deploy.yml` — sin ningún recurso de Azure nuevo (nada de Azure Functions).
-- [ ] Tras ejecutar el seeding, las pantallas públicas de calendario, resultados y clasificación (`screens.md`) muestran datos coherentes para al menos una competición de la temporada `EnCurso`.
+- [x] Ejecutar el comando de seeding contra una base de datos vacía puebla `Categoria`, `Sede`, `Club`, varias `Temporada`, `Competicion`, `Equipo`, `FichaJugador`, `Jornada` y `Partido`.
+- [x] Existe al menos una `Temporada` en estado `Finalizada` o `Archivada` con todos sus partidos en estado `Jugado` y resultado (incluidos `PartidoParcial`).
+- [x] Existe una `Temporada` en estado `EnCurso` con una mezcla de partidos `Jugado` (con resultado y parciales) y `Programado` (con fecha futura, sin resultado).
+- [x] En ninguna `Jornada` generada aparece el mismo `Equipo` dos veces (ni como local ni como visitante).
+- [x] El comando de seeding no se ejecuta como parte del arranque normal de `BasketBaseTracker.Web` — solo se dispara explícitamente.
+- [x] El comando incluye una salvaguarda explícita que impide (o exige confirmación reforzada) ejecutarlo contra la base de datos de producción.
+- [x] Existe un workflow de GitHub Actions (`workflow_dispatch`, con inputs para nº de temporadas, nº de clubes y si se borran los datos existentes) que ejecuta el seeding contra Azure SQL, reutilizando el patrón de firewall temporal de `deploy.yml` — sin ningún recurso de Azure nuevo (nada de Azure Functions).
+- [x] Tras ejecutar el seeding, las pantallas públicas de calendario, resultados y clasificación (`screens.md`) muestran datos coherentes para al menos una competición de la temporada `EnCurso`.
 
 ## Aclaraciones
 

@@ -1,0 +1,103 @@
+name: Seed de datos de demostración
+
+on:
+  workflow_dispatch:
+    inputs:
+      temporadas:
+        description: Número de temporadas históricas a generar (además de la actual)
+        required: true
+        type: number
+        default: 3
+      clubes:
+        description: Número de clubes a generar
+        required: true
+        type: number
+        default: 10
+      reset:
+        description: Borrar primero todos los datos deportivos existentes
+        required: true
+        type: boolean
+        default: false
+      confirmar:
+        description: 'Si "reset" está activado, escribir literalmente BORRAR para confirmar'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  RESOURCE_GROUP: rg-basketbasetracker-prod
+  SQL_SERVER: basketbasetracker-sql
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # No existe un entorno de staging (architecture.md punto 13): este workflow
+      # se ejecuta siempre contra la única base de datos en la nube, la de
+      # producción. "reset" es destructivo (borra todos los datos deportivos
+      # existentes) — el disparo manual de workflow_dispatch ya exige intención,
+      # pero se refuerza con esta segunda confirmación explícita, además de la que
+      # ya exige el propio comando de seeding (--confirmar BORRAR, spec.md/plan.md
+      # de BAS-17).
+      - name: Comprobar la confirmación cuando "reset" está activado
+        if: inputs.reset == true && inputs.confirmar != 'BORRAR'
+        run: |
+          echo "::error::reset está activado pero \"confirmar\" no es exactamente BORRAR. No se ha tocado nada."
+          exit 1
+
+      - name: Configurar .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Iniciar sesión en Azure (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      # Mismo patrón que "Aplicar migraciones de base de datos" en deploy.yml:
+      # abre una regla de firewall temporal en Azure SQL para la IP de este
+      # runner, la usa para esta única ejecución y la cierra siempre al terminar.
+      - name: Abrir temporalmente el firewall de Azure SQL para este runner
+        run: |
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          az sql server firewall-rule create \
+            --resource-group "$RESOURCE_GROUP" --server "$SQL_SERVER" \
+            --name "gha-seed-${{ github.run_id }}" \
+            --start-ip-address "$RUNNER_IP" --end-ip-address "$RUNNER_IP"
+
+      - name: Restaurar el proyecto Seed
+        run: dotnet restore src/BasketBaseTracker.Seed
+
+      # Login de aplicación de bajo privilegio ("basketbasetracker_app": lectura/
+      # escritura, sin DDL — architecture.md punto 6, plan.md de BAS-17 decisión
+      # técnica 7), no "sqladmin" (que sí usa deploy.yml, pero solo porque las
+      # migraciones necesitan DDL). AZURE_SQL_APP_PASSWORD es un secreto de
+      # repositorio nuevo (mismo mecanismo que AZURE_SQL_ADMIN_PASSWORD en
+      # deploy.yml) — debe configurarse a mano en GitHub con el mismo valor que el
+      # parámetro Aspire "sql-app-password" usado en el último "aspire deploy".
+      - name: Ejecutar el seeding de datos de demostración
+        env:
+          SQL_APP_PASSWORD: ${{ secrets.AZURE_SQL_APP_PASSWORD }}
+        run: |
+          export ConnectionStrings__basketbasetracker="Server=tcp:${SQL_SERVER}.database.windows.net,1433;Initial Catalog=basketbasetracker;User ID=basketbasetracker_app;Password=${SQL_APP_PASSWORD};Encrypt=True;TrustServerCertificate=False;"
+          ARGS="--temporadas ${{ inputs.temporadas }} --clubes ${{ inputs.clubes }}"
+          if [ "${{ inputs.reset }}" = "true" ]; then
+            ARGS="$ARGS --reset --confirmar BORRAR"
+          fi
+          dotnet run --project src/BasketBaseTracker.Seed -- $ARGS
+
+      - name: Cerrar el firewall temporal de Azure SQL
+        if: always()
+        run: |
+          az sql server firewall-rule delete \
+            --resource-group "$RESOURCE_GROUP" --server "$SQL_SERVER" \
+            --name "gha-seed-${{ github.run_id }}"

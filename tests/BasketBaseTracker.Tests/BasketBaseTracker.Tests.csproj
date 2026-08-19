@@ -22,6 +22,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\BasketBaseTracker.Web\BasketBaseTracker.Web.csproj" />
     <ProjectReference Include="..\..\src\BasketBaseTracker.AppHost\BasketBaseTracker.AppHost.csproj" />
+    <ProjectReference Include="..\..\src\BasketBaseTracker.Seed\BasketBaseTracker.Seed.csproj" />
   </ItemGroup>
 
 </Project>
