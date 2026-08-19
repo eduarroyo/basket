@@ -102,10 +102,22 @@ jobs:
           echo "email=$EMAIL" >> "$GITHUB_OUTPUT"
           echo "password=$PASSWORD" >> "$GITHUB_OUTPUT"
 
-      - name: Compilar los tests E2E e instalar navegadores de Playwright
-        run: |
-          dotnet build tests/BasketBaseTracker.Tests.E2E -c Release
-          pwsh tests/BasketBaseTracker.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
+      - name: Compilar los tests E2E
+        run: dotnet build tests/BasketBaseTracker.Tests.E2E -c Release
+
+      # El mirror regional que usan por defecto los runners de Ubuntu hospedados
+      # en Azure (azure.archive.ubuntu.com, vía /etc/apt/apt-mirrors.txt) puede
+      # quedarse colgado sin dar error ni hacer timeout, colgando indefinidamente
+      # el "apt-get update" que dispara "playwright install --with-deps" (visto en
+      # el primer despliegue de BAS-14 a producción: dos intentos de 30-40 min sin
+      # avanzar). Se fuerza el mirror directo de Ubuntu, que en ese mismo log sí
+      # respondía con normalidad, antes de instalar las dependencias del navegador.
+      - name: Evitar el mirror regional de apt (inestable en runners hospedados)
+        run: echo "http://archive.ubuntu.com/ubuntu" | sudo tee /etc/apt/apt-mirrors.txt
+
+      - name: Instalar navegadores de Playwright
+        timeout-minutes: 10
+        run: pwsh tests/BasketBaseTracker.Tests.E2E/bin/Release/net10.0/playwright.ps1 install --with-deps chromium
 
       # Smoke test contra la URL específica de la revisión nueva (WebAppFixture.cs,
       # modo "URL externa"), todavía sin tráfico real — si falla, no se promociona
@@ -124,6 +136,25 @@ jobs:
           az containerapp ingress traffic set \
             --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
             --revision-weight "${REVISION_NAME}=100"
+
+      # El modo "Multiple" (necesario para el patrón de promoción de tráfico de
+      # arriba) no desactiva solo las revisiones antiguas al perder el tráfico —
+      # se quedan "Active" indefinidamente, cada una con su propia réplica mínima
+      # corriendo sin ningún propósito (coste sin motivo, detectado tras acumular
+      # 8 revisiones activas simultáneas). Se desactiva aquí todo lo que no sea la
+      # revisión recién promocionada; una revisión desactivada se puede reactivar
+      # con "az containerapp revision activate" si hiciera falta un rollback.
+      - name: Desactivar revisiones anteriores sin tráfico
+        env:
+          REVISION_NAME: ${{ steps.new-revision.outputs.name }}
+        run: |
+          OTHER_REVISIONS=$(az containerapp revision list \
+            --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" \
+            --query "[?name!='${REVISION_NAME}' && properties.active].name" -o tsv)
+          for REV in $OTHER_REVISIONS; do
+            az containerapp revision deactivate \
+              --resource-group "$RESOURCE_GROUP" --name "$CONTAINER_APP" --revision "$REV"
+          done
 
       - name: Cerrar el firewall temporal de Azure SQL
         if: always()
