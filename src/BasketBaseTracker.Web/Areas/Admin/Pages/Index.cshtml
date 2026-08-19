@@ -55,4 +55,15 @@
             </div>
         </div>
     </div>
+    @if (User.IsInRole("Administrador"))
+    {
+        <div class="col-md-3 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Importación/exportación</h5>
+                    <a asp-area="Admin" asp-page="/ImportExport/Index" class="btn btn-outline-primary">Gestionar</a>
+                </div>
+            </div>
+        </div>
+    }
 </div>
