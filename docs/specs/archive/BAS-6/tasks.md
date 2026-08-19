@@ -22,5 +22,5 @@ tags:
 - [x] Test de integración que confirma que una petición anónima a una página de catálogo redirige a `/Admin/Login`.
 - [x] Verificación manual en `aspire run`: iniciar sesión, dar de alta y editar un registro de cada entidad desde el navegador (Claude in Chrome) — confirmado además que la validación cliente (`jquery.validate`) y servidor muestran los mensajes en español, y que cerrar sesión redirige a la web pública.
 - [x] `dotnet build` y `dotnet test` en verde en local antes de empujar (12/12 tests).
-- [ ] Confirmar CI (build + tests) en verde en el PR.
-- [ ] Cierre: mover `docs/specs/BAS-6/` a `docs/specs/archive/BAS-6/`, abrir el PR de `feature/BAS-6` a `develop` y esperar confirmación humana para fusionarlo.
+- [x] Confirmar CI (build + tests) en verde en el PR.
+- [x] Cierre: mover `docs/specs/BAS-6/` a `docs/specs/archive/BAS-6/`, abrir el PR de `feature/BAS-6` a `develop` y esperar confirmación humana para fusionarlo.

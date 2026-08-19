@@ -20,4 +20,10 @@ public static class ResultadoReglas
     // General de la F.A.B. — reglamento/resumen-reglas-relevantes.md, §4.
     public static (int Local, int Visitante) MarcadorTecnicoSugerido(int equipoGanadorId, int equipoLocalId) =>
         equipoGanadorId == equipoLocalId ? (2, 0) : (0, 2);
+
+    // Suma lo que haya sin exigir que estén todos los periodos (BAS-15,
+    // spec.md) — coherente con la independencia entre parciales y marcador
+    // decidida en BAS-10.
+    public static (int Local, int Visitante) SumarParciales(IEnumerable<(int PuntosLocal, int PuntosVisitante)> parciales) =>
+        (parciales.Sum(p => p.PuntosLocal), parciales.Sum(p => p.PuntosVisitante));
 }

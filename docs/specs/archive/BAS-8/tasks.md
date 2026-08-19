@@ -21,5 +21,5 @@ tags:
 - [x] Test de integración que confirma que un dorsal duplicado en el mismo equipo falla con un error de validación, no con un 500.
 - [x] Verificación manual en navegador (Claude in Chrome): login, alta, dorsal duplicado, baja con confirmación — la extensión sí estaba disponible esta vez.
 - [x] `dotnet build` y `dotnet test` en verde en local antes de empujar (incluido el proyecto E2E).
-- [ ] Confirmar CI (build + tests) en verde en el PR.
-- [ ] Cierre: mover `docs/specs/BAS-8/` a `docs/specs/archive/BAS-8/`, abrir el PR de `feature/BAS-8` a `develop` y esperar confirmación humana para fusionarlo.
+- [x] Confirmar CI (build + tests) en verde en el PR.
+- [x] Cierre: mover `docs/specs/BAS-8/` a `docs/specs/archive/BAS-8/`, abrir el PR de `feature/BAS-8` a `develop` y esperar confirmación humana para fusionarlo.

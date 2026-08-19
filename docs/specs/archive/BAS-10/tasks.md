@@ -20,4 +20,4 @@ tags:
 - [~] Verificación manual en navegador (Claude in Chrome): la extensión no estaba conectada en esta sesión — cubierto en su lugar por los tests de integración HTTP, que ejercitan las mismas páginas end-to-end. Pendiente una verificación visual manual cuando la extensión esté disponible.
 - [x] `dotnet build` + `dotnet test` en verde localmente (53/53, incluye E2E), tras arreglar un bug latente de decodificación HTML en la extracción de `RowVersion` de los tests de integración (ver `plan.md`).
 - [x] Actualizar `spec.md` (estado `Completado`, checklist de criterios de aceptación) y mover la carpeta a `docs/specs/archive/BAS-10/`.
-- [ ] Commit, push, PR de `feature/BAS-10` a `develop`; esperar confirmación humana antes de fusionar.
+- [x] Commit, push, PR de `feature/BAS-10` a `develop`; esperar confirmación humana antes de fusionar.

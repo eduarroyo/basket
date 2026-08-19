@@ -19,4 +19,4 @@ tags:
 - [~] Verificación manual en navegador (Claude in Chrome): la extensión sí estaba conectada esta vez, pero `aspire run` local no llegó a levantar `Web` — la contraseña de `sa` del volumen de datos persistente de SQL Server no coincide con la generada para esta sesión (hallazgo operativo documentado en `plan.md`, no relacionado con este incremento). Cubierto en su lugar por los tests de integración HTTP, que ejercitan las mismas páginas end-to-end contra SQL efímero (no afectado por el problema del volumen).
 - [x] `dotnet build` + `dotnet test` en verde localmente (69/69, incluye E2E).
 - [x] Actualizar `spec.md` (estado `Completado`, checklist de criterios de aceptación) y mover la carpeta a `docs/specs/archive/BAS-12/`.
-- [ ] Commit, push, PR de `feature/BAS-12` a `develop`; esperar confirmación humana antes de fusionar.
+- [x] Commit, push, PR de `feature/BAS-12` a `develop`; esperar confirmación humana antes de fusionar.
