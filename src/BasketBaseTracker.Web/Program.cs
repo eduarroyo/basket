@@ -1,6 +1,9 @@
+using System.Text;
 using BasketBaseTracker.Web.Data;
+using BasketBaseTracker.Web.Data.Entities;
 using BasketBaseTracker.Web.Domain;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -137,6 +140,45 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseOutputCache();
+
+// Suscripción iCal (BAS-14) — Minimal API en vez de Razor Pages porque no
+// producen HTML. Reutilizan la misma política de caché "Publico" que el resto
+// del área pública (architecture.md, punto 5).
+app.MapGet("/competiciones/{id:int}/calendario.ics", async (int id, ApplicationDbContext context, CancellationToken cancellationToken) =>
+{
+    var existeCompeticion = await context.Competiciones.AnyAsync(c => c.Id == id, cancellationToken);
+    if (!existeCompeticion)
+    {
+        return Results.NotFound();
+    }
+
+    var partidos = await context.Partidos
+        .Where(p => p.Jornada.CompeticionId == id && p.FechaHora != null && p.Estado != PartidoEstado.Cancelado)
+        .Select(p => new PartidoIcs(
+            p.Id, p.EquipoLocal.Nombre, p.EquipoVisitante.Nombre, p.FechaHora!.Value,
+            p.Sede == null ? null : p.Sede.Nombre, p.Sede == null ? null : p.Sede.Municipio))
+        .ToListAsync(cancellationToken);
+
+    return Results.Text(IcsFeedBuilder.Construir(partidos), "text/calendar", Encoding.UTF8);
+}).CacheOutput("Publico");
+
+app.MapGet("/equipos/{id:int}/calendario.ics", async (int id, ApplicationDbContext context, CancellationToken cancellationToken) =>
+{
+    var existeEquipo = await context.Equipos.AnyAsync(e => e.Id == id, cancellationToken);
+    if (!existeEquipo)
+    {
+        return Results.NotFound();
+    }
+
+    var partidos = await context.Partidos
+        .Where(p => (p.EquipoLocalId == id || p.EquipoVisitanteId == id) && p.FechaHora != null && p.Estado != PartidoEstado.Cancelado)
+        .Select(p => new PartidoIcs(
+            p.Id, p.EquipoLocal.Nombre, p.EquipoVisitante.Nombre, p.FechaHora!.Value,
+            p.Sede == null ? null : p.Sede.Nombre, p.Sede == null ? null : p.Sede.Municipio))
+        .ToListAsync(cancellationToken);
+
+    return Results.Text(IcsFeedBuilder.Construir(partidos), "text/calendar", Encoding.UTF8);
+}).CacheOutput("Publico");
 
 app.MapStaticAssets();
 app.MapRazorPages()
