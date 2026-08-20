@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>BasketBaseTracker — Presentación</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/monokai.css" />
+
+  <style>
+    :root {
+      --accent: #d9480f;
+      --accent-dark: #a83800;
+      --ink: #1c1c1c;
+    }
+    .reveal { font-family: "Segoe UI", Arial, sans-serif; color: var(--ink); }
+    .reveal h1, .reveal h2, .reveal h3 { font-weight: 700; letter-spacing: -0.01em; text-transform: none; }
+    .reveal h1 { color: var(--accent-dark); }
+    .reveal h2 { color: var(--accent-dark); font-size: 1.5em; }
+    .reveal section.has-dark-background h1,
+    .reveal section.has-dark-background h2 { color: #fff; }
+    .reveal .subtitle { color: #666; font-size: 0.6em; font-weight: 400; }
+    .reveal ul, .reveal ol { display: block; }
+    .reveal li { margin-bottom: 0.35em; }
+    .reveal .small { font-size: 0.62em; line-height: 1.4; }
+    .reveal .tag {
+      display: inline-block; background: var(--accent); color: #fff;
+      font-size: 0.35em; padding: 0.2em 0.7em; border-radius: 999px;
+      letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 0.6em;
+    }
+    .reveal .shot {
+      border: 1px solid #ddd; border-radius: 6px; box-shadow: 0 6px 24px rgba(0,0,0,0.15);
+      max-height: 62vh; max-width: 100%;
+    }
+    .reveal .shot-row { display: flex; gap: 1.2em; justify-content: center; align-items: flex-start; }
+    .reveal .shot-row figure { margin: 0; flex: 1; }
+    .reveal .shot-row .shot { max-height: 46vh; }
+    .reveal figcaption { font-size: 0.5em; color: #888; margin-top: 0.5em; }
+    .reveal .two-col { display: flex; gap: 2em; text-align: left; }
+    .reveal .two-col > div { flex: 1; }
+    .reveal .badge-ok { color: #2b8a3e; font-weight: 700; }
+    .reveal .badge-fix { color: var(--accent-dark); font-weight: 700; }
+    .reveal .footline { font-size: 0.4em; color: #999; margin-top: 1.5em; }
+    .reveal code { background: #f1f1f1; border-radius: 4px; }
+    .reveal pre code.hljs { font-size: 0.55em; }
+    .mermaid { background: transparent; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section>
+        <div class="tag">Trabajo de fin de curso · Desarrollo con IA</div>
+        <h1>BasketBaseTracker</h1>
+        <p class="subtitle">Seguimiento de la competición de baloncesto base de la provincia de Sevilla</p>
+        <p class="small" style="margin-top: 2em;">Eduardo Arroyo — 2026</p>
+      </section>
+
+      <section>
+        <h2>El contexto</h2>
+        <ul>
+          <li>Cada temporada, varios clubes de la provincia de Sevilla organizan competiciones de baloncesto base (benjamín, alevín, infantil, cadete, juvenil...).</li>
+          <li>Calendarios, resultados y clasificaciones se llevaban de forma dispersa y manual.</li>
+          <li>Proyecto <strong>voluntario, sin financiación</strong>, desarrollado y mantenido por una única persona que asume todos los roles.</li>
+        </ul>
+        <p class="footline">docs/functional.md — Recursos de desarrollo</p>
+      </section>
+
+      <section>
+        <h2>Qué hace la aplicación</h2>
+        <div class="two-col">
+          <div>
+            <h3 class="small" style="color:#333">Parte pública</h3>
+            <ul class="small">
+              <li>Calendarios y resultados por jornada</li>
+              <li>Clasificación por categoría</li>
+              <li>Fichas de equipo, club y sede</li>
+              <li>Suscripción iCal / Google Calendar</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="small" style="color:#333">Panel de administración</h3>
+            <ul class="small">
+              <li>Temporadas, categorías, clubes, sedes</li>
+              <li>Equipos, plantillas, calendario</li>
+              <li>Introducción de resultados y parciales</li>
+              <li>Importación/exportación completa (backup)</li>
+            </ul>
+          </div>
+        </div>
+        <p class="footline">~25 pantallas — docs/screens.md</p>
+      </section>
+
+      <section>
+        <h2>La parte pública, en producción</h2>
+        <div class="shot-row">
+          <figure>
+            <img class="shot" src="img/portada.jpg" alt="Portada de BasketBaseTracker" />
+            <figcaption>Portada — selector de temporada</figcaption>
+          </figure>
+          <figure>
+            <img class="shot" src="img/calendario.jpg" alt="Calendario de una competición" />
+            <figcaption>Calendario de la competición Benjamín 2024-2025</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h2>Resultados y clasificación</h2>
+        <div class="shot-row">
+          <figure>
+            <img class="shot" src="img/detalle-partido.jpg" alt="Detalle de un partido con parciales" />
+            <figcaption>Detalle de partido, con parciales por cuarto</figcaption>
+          </figure>
+          <figure>
+            <img class="shot" src="img/clasificacion.jpg" alt="Tabla de clasificación" />
+            <figcaption>Clasificación calculada al vuelo, no una tabla materializada</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h2>Arquitectura</h2>
+        <pre class="mermaid" style="font-size: 0.5em;">
+flowchart LR
+    Usuario -->|HTTPS| CF[Cloudflare<br/>CDN + WAF + rate limiting]
+    CF --> CA[Azure Container Apps<br/>BasketBaseTracker.Web]
+    CA --> SQL[(Azure SQL Database<br/>Serverless, auto-pause)]
+    CA --> KV[Azure Key Vault<br/>secretos]
+    CA --> AI[Application Insights<br/>OpenTelemetry]
+    GH[GitHub Actions] -->|build + test + deploy| CA
+        </pre>
+        <p class="small" style="margin-top:1em">.NET 10 · ASP.NET Core Razor Pages · EF Core · .NET Aspire (IaC) · un único lenguaje de extremo a extremo</p>
+      </section>
+
+      <section>
+        <h2>Decisiones razonadas, no por defecto</h2>
+        <ul class="small">
+          <li><strong>Clasificación calculada al vuelo</strong>, sin tabla materializada — evita una condición de carrera real (<em>lost update</em>) entre administradores editando partidos en paralelo.</li>
+          <li><strong>Caché con TTL, sin purga activa</strong> — la consistencia eventual de 5 min que exige el propio documento funcional permite cachear agresivamente sin gestionar un secreto ni una API de purga adicional.</li>
+          <li><strong>Hosting serverless</strong> (Container Apps + SQL Serverless, escala a cero) — coherente con una carga muy estacional y presupuesto cero.</li>
+        </ul>
+        <p class="footline">Cada decisión documentada con su alternativa descartada en docs/architecture.md</p>
+      </section>
+
+      <section>
+        <h2>El proceso: desarrollo dirigido por especificaciones</h2>
+        <div class="two-col">
+          <div class="small">
+            <ol>
+              <li><strong>spec.md</strong> — qué y por qué, alcance, criterios de aceptación</li>
+              <li><strong>Aclaraciones</strong> — ronda de preguntas antes de planificar</li>
+              <li><strong>plan.md</strong> — cómo, entidades y pantallas afectadas</li>
+              <li><strong>tasks.md</strong> — tareas pequeñas y verificables</li>
+              <li><strong>Implementación</strong></li>
+              <li><strong>Cierre</strong> — archivado, PR, confirmación humana</li>
+            </ol>
+          </div>
+          <div class="small" style="align-self:center">
+            <p>Cada incremento (<code>BAS-N</code>) es una conversación estructurada con el asistente de IA, no una única generación de código.</p>
+            <p>18 incrementos completados hasta la fecha — este mismo documento es <code>BAS-19</code>.</p>
+          </div>
+        </div>
+        <p class="footline">docs/workflow.md</p>
+      </section>
+
+      <section>
+        <h2>Caso de estudio — BAS-3, despliegue a producción</h2>
+        <p class="small">Plan inicial: Managed Identity para que <code>Web</code> accediera a Azure SQL, según <code>architecture.md</code>.</p>
+        <p class="small"><span class="badge-fix">Incidente real:</span> el script que Aspire genera para dar de alta esa identidad fallaba de forma determinista (bug conocido de la plataforma, conflicto de versiones en el módulo de PowerShell de SQL Server).</p>
+        <p class="small"><span class="badge-ok">Resuelto:</span> se revirtió a autenticación SQL con un login de aplicación de privilegios mínimos, documentando la causa raíz y la alternativa descartada directamente en <code>architecture.md</code> y en el propio <code>spec.md</code> de BAS-3.</p>
+        <p class="footline">El valor del proceso no es "generar código que compila", es descubrir y documentar por qué un plan cambia</p>
+      </section>
+
+      <section>
+        <h2>Gobernanza</h2>
+        <ul class="small">
+          <li>Una rama <code>feature/BAS-N</code> por incremento, creada desde <code>develop</code></li>
+          <li><code>main</code> y <code>develop</code> protegidas: sin push directo, PR obligatorio, CI en verde</li>
+          <li><strong>Ningún PR se fusiona sin confirmación humana explícita</strong> — ni siquiera con todas las tareas completadas</li>
+          <li>El asistente de IA nunca fusiona ni borra ramas por su cuenta</li>
+        </ul>
+        <p class="footline">CLAUDE.md — reglas de trabajo obligatorias</p>
+      </section>
+
+      <section>
+        <h2>Testing</h2>
+        <div class="two-col small">
+          <div>
+            <p><strong>Unitarios</strong><br/>lógica de dominio pura (clasificación, validaciones de negocio) — segundos</p>
+          </div>
+          <div>
+            <p><strong>Integración</strong><br/>Razor Pages + EF Core contra base de datos real, vía <code>Aspire.Hosting.Testing</code></p>
+          </div>
+          <div>
+            <p><strong>E2E</strong><br/>smoke test con Playwright, solo antes de desplegar a producción</p>
+          </div>
+        </div>
+        <p class="footline">Sin mocks de infraestructura: o lógica pura, o dependencias reales — docs/architecture.md, punto 15</p>
+      </section>
+
+      <section>
+        <h2>Estado actual</h2>
+        <ul class="small">
+          <li>18 incrementos <code>BAS-N</code> completados y archivados</li>
+          <li>Desplegado en producción en Azure Container Apps</li>
+          <li>Datos reales de 4 temporadas, varias categorías por temporada</li>
+          <li>Observabilidad con OpenTelemetry → Application Insights</li>
+        </ul>
+      </section>
+
+      <section>
+        <h1>Gracias</h1>
+        <p class="small">github.com/eduarroyo/basket</p>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/notes/notes.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/plugin/highlight/highlight.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>
+    mermaid.initialize({ startOnLoad: false, theme: "neutral" });
+
+    Reveal.initialize({
+      hash: true,
+      controls: true,
+      progress: true,
+      center: true,
+      transition: "slide",
+      plugins: [ RevealNotes, RevealHighlight ]
+    }).then(() => {
+      mermaid.run({ querySelector: ".mermaid" });
+    });
+  </script>
+</body>
+</html>

@@ -243,6 +243,46 @@ public class PublicPagesTests(AppHostSqlFixture fixture) : IClassFixture<AppHost
     }
 
     [Fact]
+    public async Task LaBarraSuperiorPublicaEnlazaAlAreaDeGestion()
+    {
+        // BAS-20: acceso al panel de administración desde la parte pública, sin
+        // comprobar el estado de autenticación en el propio layout (el enlace es
+        // idéntico para anónimos y autenticados; decide la redirección el middleware).
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var anonimo = fixture.CreateAnonymousWebHttpClient();
+        var html = await (await anonimo.GetAsync("/", cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
+
+        Assert.Contains("""href="/Admin">Área de gestión</a>""", html);
+    }
+
+    [Fact]
+    public async Task ElEnlaceAlAreaDeGestionRedirigeALoginSinSesion()
+    {
+        // BAS-20: seguir el enlace "Área de gestión" sin sesión iniciada debe
+        // aterrizar en el login (mismo mecanismo que cualquier página Admin, ver
+        // CatalogoAdminPagesTests.PeticionAnonimaATemporadasRedirigeALogin).
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var anonimo = fixture.CreateAnonymousWebHttpClient();
+
+        using var response = await anonimo.GetAsync("/Admin", cancellationToken);
+
+        Assert.Equal("/Admin/Login", response.RequestMessage?.RequestUri?.AbsolutePath);
+    }
+
+    [Fact]
+    public async Task ElEnlaceAlAreaDeGestionAterrizaDirectoConSesionIniciada()
+    {
+        // BAS-20: con sesión ya iniciada, el mismo enlace no debe pasar por login.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var client = fixture.CreateWebHttpClient();
+        await LoginAsync(client, cancellationToken);
+
+        using var response = await client.GetAsync("/Admin", cancellationToken);
+
+        Assert.Equal("/Admin", response.RequestMessage?.RequestUri?.AbsolutePath);
+    }
+
+    [Fact]
     public async Task LasPaginasPublicasLlevanOutputCachingActivo()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
