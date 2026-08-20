@@ -216,6 +216,33 @@ public class PublicPagesTests(AppHostSqlFixture fixture) : IClassFixture<AppHost
     }
 
     [Fact]
+    public async Task LaBarraSuperiorEnlazaALaPortada()
+    {
+        // BAS-18: título y "Inicio" usaban asp-area="" (sin área), que no resuelve
+        // a ninguna página real y dejaba al usuario en la página actual.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var anonimo = fixture.CreateAnonymousWebHttpClient();
+        var html = await (await anonimo.GetAsync("/", cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
+
+        Assert.Contains("""href="/">BasketBaseTracker</a>""", html);
+        Assert.Contains("""href="/">Inicio</a>""", html);
+    }
+
+    [Fact]
+    public async Task VerWebPublicaDesdeElAreaAdminEnlazaALaPortada()
+    {
+        // BAS-18: mismo bug que el título/"Inicio" de la barra pública, en el
+        // layout del área Admin.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var client = fixture.CreateWebHttpClient();
+        await LoginAsync(client, cancellationToken);
+
+        var html = await (await client.GetAsync("/Admin/Index", cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
+
+        Assert.Contains("""href="/">Ver web pública</a>""", html);
+    }
+
+    [Fact]
     public async Task LasPaginasPublicasLlevanOutputCachingActivo()
     {
         var cancellationToken = TestContext.Current.CancellationToken;

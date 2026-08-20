@@ -79,6 +79,23 @@ public class ClasificacionPagesTests(AppHostSqlFixture fixture) : IClassFixture<
     }
 
     [Fact]
+    public async Task LaPaginaPublicaTieneEnlaceDeVueltaACompeticiones()
+    {
+        // BAS-18: la clasificación pública no tenía ningún enlace de vuelta, a
+        // diferencia del resto de páginas del área pública.
+        var cancellationToken = TestContext.Current.CancellationToken;
+        using var client = fixture.CreateWebHttpClient();
+        await LoginAsync(client, cancellationToken);
+
+        var (competicionId, _, _, temporadaId, _) = await CrearCompeticionConEquiposAsync(client, "clasificacion-volver", numeroDeEquipos: 1, cancellationToken);
+
+        using var anonimo = fixture.CreateAnonymousWebHttpClient();
+        var html = await (await anonimo.GetAsync($"/competiciones/{competicionId}/clasificacion", cancellationToken)).Content.ReadAsStringAsync(cancellationToken);
+
+        Assert.Contains($"""href="/temporadas/{temporadaId}/competiciones">Volver a competiciones</a>""", html);
+    }
+
+    [Fact]
     public async Task LaPaginaPublicaLlevaOutputCachingYLaAdminNo()
     {
         var cancellationToken = TestContext.Current.CancellationToken;
