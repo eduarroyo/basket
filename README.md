@@ -23,6 +23,32 @@ Permite consultar de forma pública calendarios, resultados y clasificaciones de
 
 Detalles y justificación de cada decisión en [`docs/architecture.md`](docs/architecture.md).
 
+## Funcionalidades principales
+
+- **Consulta pública** (sin autenticación): calendarios de competición por jornada, resultados (marcador y parciales por cuarto), clasificación calculada por categoría, ficha de equipo/club/sede, y suscripción a calendario en formato iCal por competición o por equipo.
+- **Panel de administración** (autenticado): gestión de temporadas, categorías, clubes, sedes, competiciones, equipos, plantillas (dorsal/posición, sin datos personales), planificación de calendarios y jornadas, e introducción de resultados (incluida la resolución administrativa de partidos aplazados, cancelados o con victoria declarada sin disputarse).
+- **Penalizaciones de clasificación**: ajustes de puntos a un equipo con motivo y, opcionalmente, partido vinculado.
+- **Importación/exportación completa** de todos los datos del sistema, para backup o migración — solo accesible al rol `Administrador`.
+- **Observabilidad** vía OpenTelemetry (logs, métricas, trazas) exportada a Application Insights.
+
+Inventario completo de pantallas en [`docs/screens.md`](docs/screens.md).
+
+## Estructura del proyecto
+
+```
+├── src/
+│   ├── BasketBaseTracker.AppHost/           # Orquestación .NET Aspire (local y despliegue)
+│   ├── BasketBaseTracker.ServiceDefaults/   # Configuración compartida (OpenTelemetry, health checks, resiliencia)
+│   ├── BasketBaseTracker.Web/               # Aplicación ASP.NET Core (Razor Pages, Areas Public/Admin, EF Core)
+│   └── BasketBaseTracker.Seed/              # Comando de consola para poblar datos de demostración
+├── tests/                                   # Proyectos de test
+├── docs/
+│   ├── specs/                               # Incrementos BAS-N (spec → plan → tasks) y specs/archive/ para los cerrados
+│   ├── functional.md, data-model.md, screens.md, architecture.md, workflow.md
+├── global.json                              # Versión de SDK de .NET fijada
+└── aspire.config.json                       # Configuración de la CLI de Aspire
+```
+
 ## Reglas de colaboración
 
 El desarrollo sigue un flujo dirigido por especificaciones (spec-driven development), detallado en [`docs/workflow.md`](docs/workflow.md). En resumen:
@@ -32,6 +58,19 @@ El desarrollo sigue un flujo dirigido por especificaciones (spec-driven developm
 - Ciclo por incremento: **propuesta → aclaración → plan → tareas → implementación → cierre**. El cierre archiva la carpeta en `docs/specs/archive/` y actualiza `data-model.md`/`screens.md`/`architecture.md` si el incremento introdujo cambios de diseño no anticipados.
 - Cada incremento se trabaja en su propia rama `feature/BAS-N`, creada desde `develop` al empezar. Se cierra con un PR a `develop` que **solo se fusiona con confirmación humana explícita**.
 - Las specs usan propiedades de Obsidian (frontmatter YAML en `camelCase`) para poder visualizar las dependencias entre incrementos (`dependeDe`) como grafo.
+
+## Cómo contribuir (de un incremento a producción)
+
+Pasos completos desde que se propone un incremento hasta que el código llega a producción — detalle del proceso en [`docs/workflow.md`](docs/workflow.md), de la pipeline en [`docs/architecture.md`](docs/architecture.md#13-cicd):
+
+1. **Crear la rama** `feature/BAS-N` desde `develop`.
+2. **Especificar el incremento** en `docs/specs/BAS-N/`: `spec.md` (propuesta + ronda de aclaraciones) → `plan.md` (diseño técnico) → `tasks.md` (tareas verificables), cumpliendo la Definición de Listo antes de empezar a implementar (`docs/workflow.md`).
+3. **Implementar** tarea a tarea, marcando checkboxes en `tasks.md`. Cada `push`/PR contra `develop` o `main` dispara `ci.yml` (build + tests unitarios y de integración), que bloquea el merge si falla.
+4. **Cerrar el incremento**: mover la carpeta a `docs/specs/archive/`, actualizar `data-model.md`/`screens.md`/`architecture.md` si hubo cambios de diseño no anticipados, y comprobar la Definición de Hecho.
+5. **Abrir un PR** de `feature/BAS-N` a `develop`. `main` y `develop` son ramas protegidas (Rulesets de GitHub): PR obligatorio y CI en verde, pero **la fusión siempre exige confirmación humana explícita**, nunca la hace el asistente de IA aunque todo esté completo.
+6. **Promocionar a producción**: cuando se decide sacar los incrementos ya en `develop`, se abre un PR de `develop` a `main` (misma regla: fusión solo con confirmación humana). El `push` a `main` dispara automáticamente:
+   - `publish.yml` — build, tests, y publica la imagen de contenedor (SDK Container Support, sin Dockerfile) en el Azure Container Registry, etiquetada con el SHA corto del commit.
+   - `deploy.yml` — aplica las migraciones de base de datos pendientes, despliega la imagen nueva como revisión de Container Apps **sin tráfico**, ejecuta un smoke test E2E (Playwright) contra esa revisión y, solo si pasa, promociona el 100% del tráfico. Si falla, la revisión queda desplegada pero inactiva — no requiere rollback.
 
 ### Arranque en local
 
@@ -44,6 +83,8 @@ Requisitos previos: SDK de .NET 10 estable (ver `global.json`), Docker Desktop (
    dotnet user-secrets set "Seed:AdminPassword" "UnaClaveDeAlMenos12Caracteres!" --project src/BasketBaseTracker.Web
    ```
    Sin esto, el arranque falla con un error explícito indicando qué configurar (no arranca con un administrador sin credenciales conocidas).
+
+   > **No hay usuario/contraseña de prueba fijos.** El único administrador inicial es el que tú mismo defines aquí — úsalos para entrar en `/Admin/Login` una vez arrancada la aplicación.
 3. `aspire run` desde la raíz del repo — levanta `Web` y el contenedor local de SQL Server con dashboard de logs/trazas/métricas.
 
 ### Migraciones de base de datos
