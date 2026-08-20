@@ -196,6 +196,26 @@ if (builder.ExecutionContext.IsPublishMode)
                 BEGIN
                     ALTER USER [{SqlAppLoginName}] WITH PASSWORD = '{escapedAppPassword}';
                 END
+
+                -- SET IDENTITY_INSERT (ImportadorDatos.cs, BAS-16) exige permiso ALTER sobre
+                -- la tabla, no solo lectura/escritura -- sin esto, la importación falla con
+                -- "Cannot find the object... because it does not exist or you do not have
+                -- permissions" (SQL Server oculta el error de permisos como "no existe").
+                -- Se concede tabla a tabla (no ALTER a nivel de esquema ni db_ddladmin) para
+                -- no dar más privilegio del necesario -- debe coincidir con
+                -- ImportadorDatos.TablasEnOrdenDeBorrado. Los GRANT son idempotentes, se
+                -- repiten en cada ejecución tanto para logins nuevos como ya existentes.
+                GRANT ALTER ON [Sedes] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Clubes] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Temporadas] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Categorias] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Competiciones] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Equipos] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [FichasJugador] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Jornadas] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [Partidos] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [PartidosParciales] TO [{SqlAppLoginName}];
+                GRANT ALTER ON [PenalizacionesClasificacion] TO [{SqlAppLoginName}];
                 """;
             await command.ExecuteNonQueryAsync(context.CancellationToken);
         },
