@@ -174,6 +174,10 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Debe ir antes de UseRouting(): reescribe "/presentacion/" a "/presentacion/index.html"
+// antes de que el enrutamiento de endpoints decida sobre la ruta original.
+app.UseDefaultFiles();
+
 app.UseRouting();
 
 app.UseAuthentication();

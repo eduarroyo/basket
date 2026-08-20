@@ -119,6 +119,11 @@
     <File Path="docs/specs/archive/BAS-18/plan.md" />
     <File Path="docs/specs/archive/BAS-18/tasks.md" />
   </Folder>
+  <Folder Name="/docs/specs/archive/BAS-19/">
+    <File Path="docs/specs/archive/BAS-19/spec.md" />
+    <File Path="docs/specs/archive/BAS-19/plan.md" />
+    <File Path="docs/specs/archive/BAS-19/tasks.md" />
+  </Folder>
   <Folder Name="/docs/specs/archive/BAS-20/">
     <File Path="docs/specs/archive/BAS-20/spec.md" />
     <File Path="docs/specs/archive/BAS-20/plan.md" />
