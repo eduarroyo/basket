@@ -11,7 +11,7 @@ Permite consultar de forma pública calendarios, resultados y clasificaciones de
 | Repositorio | <https://github.com/eduarroyo/basket> |
 | Producción | https://web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io/ |
 | Slides | https://web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io/presentacion |
-| Vídeo | _pendiente_ |
+| Vídeo | https://youtu.be/w8c-6L1w0Ic |
 
 ## Documentación
 
