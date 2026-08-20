@@ -4,6 +4,15 @@ BasketBaseTracker es una plataforma de seguimiento de la competición de balonce
 
 Permite consultar de forma pública calendarios, resultados y clasificaciones de las distintas categorías (benjamín, alevín, infantil, cadete, juvenil...) a lo largo de la temporada, y ofrece un panel de administración para gestionar temporadas, categorías, clubes, equipos, sedes, calendarios y resultados. No se gestionan datos personales: los jugadores se tratan como atributos anónimos de cada equipo (dorsal, posición), no como entidades con identidad propia.
 
+## Entregables
+
+| Entregable | URL |
+|---|---|
+| Repositorio | <https://github.com/eduarroyo/basket> |
+| Producción | _pendiente_ |
+| Slides | _pendiente_ |
+| Vídeo | _pendiente_ |
+
 ## Documentación
 
 - [`docs/functional.md`](docs/functional.md) — requisitos funcionales y no funcionales, alcance, usuarios del sistema.
@@ -22,6 +31,9 @@ Permite consultar de forma pública calendarios, resultados y clasificaciones de
 - **CDN/seguridad perimetral**: Cloudflare.
 
 Detalles y justificación de cada decisión en [`docs/architecture.md`](docs/architecture.md).
+
+> [!NOTE]
+> El entorno de producción está desplegado con recursos mínimos para mantener el coste en cero. **Azure Container Apps** funciona con *scale-to-zero* (0 réplicas en reposo), y **Azure SQL Database** usa el tier **Serverless** con *auto-pause*. La primera petición tras un periodo de inactividad puede tardar varios segundos en responder mientras se produce el *cold start* del Container App y el *auto-resume* de la base de datos — es el comportamiento esperado, no un fallo del servicio.
 
 ## Funcionalidades principales
 
