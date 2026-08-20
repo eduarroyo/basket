@@ -158,6 +158,14 @@ if (builder.ExecutionContext.IsPublishMode)
     // idempotente, el login de aplicación como usuario contenido de la base de
     // datos, con permisos mínimos (lectura/escritura, sin DDL). Usa
     // Microsoft.Data.SqlClient directamente, no el módulo de PowerShell SqlServer.
+    //
+    // El ALTER USER del bloque ELSE es necesario porque "sql-app-password" es un
+    // parámetro secreto de Aspire sin persistencia propia: si su valor cambia entre
+    // un "aspire deploy" y el siguiente, el Container App recibe la contraseña nueva
+    // pero, sin este ALTER USER, el login de SQL se quedaba con la antigua (el CREATE
+    // USER del bloque IF nunca se repite una vez creado) — causa real de una caída de
+    // producción por "Login failed for user 'basketbasetracker_app'" que solo se pudo
+    // arreglar entonces con un ALTER USER manual.
     builder.Pipeline.AddStep(
         "provision-sql-app-login",
         async context =>
@@ -183,6 +191,10 @@ if (builder.ExecutionContext.IsPublishMode)
                     ALTER ROLE db_datareader ADD MEMBER [{SqlAppLoginName}];
                     ALTER ROLE db_datawriter ADD MEMBER [{SqlAppLoginName}];
                     GRANT EXECUTE TO [{SqlAppLoginName}];
+                END
+                ELSE
+                BEGIN
+                    ALTER USER [{SqlAppLoginName}] WITH PASSWORD = '{escapedAppPassword}';
                 END
                 """;
             await command.ExecuteNonQueryAsync(context.CancellationToken);
