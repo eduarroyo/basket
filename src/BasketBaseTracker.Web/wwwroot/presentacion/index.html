@@ -73,11 +73,11 @@
       <section>
         <h2>El contexto</h2>
         <ul>
-          <li>Cada temporada, varios clubes de la provincia de Sevilla organizan competiciones de baloncesto base (benjamín, alevín, infantil, cadete, juvenil...).</li>
+          <li>Cada temporada, varios clubes de la provincia de Sevilla organizan competiciones de baloncesto base (benjamín, alevín, infantil, cadete, juvenil...) — los <strong>juegos mancomunados</strong>.</li>
           <li>Calendarios, resultados y clasificaciones se llevaban de forma dispersa y manual.</li>
-          <li>Proyecto <strong>voluntario, sin financiación</strong>, desarrollado y mantenido por una única persona que asume todos los roles.</li>
+          <li>Nace como <strong>Trabajo de Fin de Máster</strong>, con la aspiración de convertirse en una herramienta real para el seguimiento de esta competición.</li>
         </ul>
-        <p class="footline">docs/functional.md — Recursos de desarrollo</p>
+        <p class="footline">docs/functional.md</p>
       </section>
 
       <section>
@@ -144,7 +144,17 @@ flowchart LR
     CA --> AI[Application Insights<br/>OpenTelemetry]
     GH[GitHub Actions] -->|build + test + deploy| CA
         </pre>
-        <p class="small" style="margin-top:1em">.NET 10 · ASP.NET Core Razor Pages · EF Core · .NET Aspire (IaC) · un único lenguaje de extremo a extremo</p>
+        <div class="two-col small" style="margin-top: 0.8em">
+          <ul class="small" style="margin: 0">
+            <li>.NET 10</li>
+            <li>ASP.NET Core Razor Pages</li>
+            <li>EF Core</li>
+            <li>.NET Aspire (IaC)</li>
+          </ul>
+          <div class="small">
+            <p><strong>Simplicidad deliberada:</strong> el foco del proyecto estaba en incorporar la IA al flujo de desarrollo, no en construir una arquitectura más compleja y extensible (p. ej. SPA + API separada). Un único proyecto, un único lenguaje, de extremo a extremo.</p>
+          </div>
+        </div>
       </section>
 
       <section>
@@ -168,16 +178,16 @@ flowchart LR
       </section>
 
       <section>
-        <h2>Despliegue continuo</h2>
+        <h2>CI/CD: integración, publicación y despliegue</h2>
         <div class="two-col small">
           <div>
-            <p><strong>ci.yml</strong><br/>build + tests en cada push/PR a <code>develop</code>/<code>main</code>, sin secretos de Azure</p>
+            <p><strong>Integración — ci.yml</strong><br/>build + tests en cada push/PR a <code>develop</code>/<code>main</code>, sin secretos de Azure</p>
           </div>
           <div>
-            <p><strong>publish.yml</strong><br/>push a <code>main</code>: build + tests + imagen al Azure Container Registry (sin Dockerfile)</p>
+            <p><strong>Publicación — publish.yml</strong><br/>push a <code>main</code>: build + tests + imagen al Azure Container Registry (sin Dockerfile)</p>
           </div>
           <div>
-            <p><strong>deploy.yml</strong><br/>migración de BD + despliegue como revisión sin tráfico + smoke E2E + promoción</p>
+            <p><strong>Despliegue — deploy.yml</strong><br/>migración de BD + revisión sin tráfico + smoke E2E + promoción</p>
           </div>
         </div>
         <ul class="small" style="margin-top: 0.8em">
@@ -185,7 +195,7 @@ flowchart LR
           <li>Container Apps en modo de <strong>revisiones múltiples</strong>: la imagen nueva solo recibe tráfico si el smoke E2E pasa contra su propia URL</li>
           <li>Rollback sin redesplegar: apuntar el tráfico a la revisión anterior</li>
         </ul>
-        <p class="footline">docs/architecture.md, punto 13</p>
+        <p class="footline">Tecnologías: GitHub Actions (orquestación) · .NET Aspire (modelo de infraestructura) · Azure Container Registry · Azure Container Apps — docs/architecture.md, punto 13</p>
       </section>
 
       <section>
@@ -272,6 +282,17 @@ flowchart LR
       </section>
 
       <section>
+        <h2>Mejoras pendientes</h2>
+        <ul class="small">
+          <li><strong>BAS-4 — dominio propio y Cloudflare</strong>: sigue en estado "Planificado"; producción sirve todavía desde la URL por defecto de Azure Container Apps.</li>
+          <li><strong>Interfaz y experiencia de usuario</strong>: diseño visual mínimo, sin trabajo de UX dedicado — el foco estuvo en el proceso, no en la presentación.</li>
+          <li><strong>Alta de administradores</strong>: la pantalla "Usuarios/roles" sigue siendo un <em>placeholder</em> — el alta de un nuevo administrador es manual, sin interfaz propia.</li>
+          <li><strong>Roles administrativos más granulares</strong> (gestor de equipos, de resultados...) y <strong>2FA opcional</strong> — ya evaluados y registrados como mejora futura.</li>
+        </ul>
+        <p class="footline">No es lo que "faltó" por descuido — son decisiones conscientes de alcance, documentadas en docs/architecture.md → Mejoras futuras</p>
+      </section>
+
+      <section>
         <h1>Gracias</h1>
         <p class="small">github.com/eduarroyo/basket</p>
         <span class="title-logo logo-crop" style="margin-top:2em"><img src="img/bigschool-logo.svg" alt="BIGschool" /></span>
@@ -291,6 +312,19 @@ flowchart LR
   <script>
     mermaid.initialize({ startOnLoad: false, theme: "neutral" });
 
+    // reveal.js oculta con display:none las diapositivas que no están activas.
+    // mermaid mide el texto con getBBox(), que devuelve 0 en elementos ocultos
+    // — renderizar todos los diagramas de golpe al cargar deja los que no
+    // están en la primera diapositiva con cajas vacías o mal dimensionadas.
+    // Se renderiza cada diagrama justo cuando su diapositiva se hace visible.
+    function renderMermaidInCurrentSlide() {
+      var slide = Reveal.getCurrentSlide();
+      var diagrams = slide.querySelectorAll(".mermaid:not([data-processed])");
+      if (diagrams.length) {
+        mermaid.run({ nodes: diagrams });
+      }
+    }
+
     Reveal.initialize({
       hash: true,
       controls: true,
@@ -299,7 +333,8 @@ flowchart LR
       transition: "slide",
       plugins: [ RevealNotes, RevealHighlight ]
     }).then(() => {
-      mermaid.run({ querySelector: ".mermaid" });
+      renderMermaidInCurrentSlide();
+      Reveal.on("slidechanged", renderMermaidInCurrentSlide);
     });
   </script>
 </body>

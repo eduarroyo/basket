@@ -27,3 +27,12 @@ tags:
 - [x] Pedir permiso y descargar el logo de BIGschool a `img/bigschool-logo.svg`; corregir por CSS el recorte del lienzo vacío del fichero de origen
 - [x] Ajustar título/subtítulo a "Máster en Desarrollo con IA" · BIGschool
 - [x] Revalidar en local con `aspire run` (capturas de cada diapositiva nueva) tras un fallo transitorio de puerto en el primer intento
+
+## Iteración 3 (con el PR #38 abierto, antes de fusionar)
+
+- [x] Quitar el framing "proyecto voluntario, sin financiación" de la diapositiva de contexto; reformular como Trabajo de Fin de Máster con vocación de convertirse en herramienta real
+- [x] Añadir diapositiva "Mejoras pendientes" (BAS-4, UX/interfaz, alta de administradores, mejoras futuras registradas en `architecture.md`)
+- [x] Mejorar la diapositiva de arquitectura: lista de tecnologías con viñetas (antes en una sola línea) + nota de simplicidad deliberada
+- [x] Renombrar y reforzar la diapositiva de CI/CD: fases etiquetadas (Integración/Publicación/Despliegue) + línea de tecnologías
+- [x] Diagnosticar y corregir el bug de "recuadro vacío" en el diagrama Mermaid: renderizar cada diagrama al hacerse visible su diapositiva (`slidechanged`), no todos de golpe al cargar con las demás diapositivas ocultas (`display:none` rompe `getBBox()`)
+- [x] Revalidar navegando la presentación de principio a fin con clics reales (no solo saltos de hash) para reproducir fielmente el escenario del bug
