@@ -33,6 +33,9 @@
     <File Path="docs/specs/BAS-4/plan.md" />
     <File Path="docs/specs/BAS-4/tasks.md" />
   </Folder>
+  <Folder Name="/docs/specs/BAS-20/">
+    <File Path="docs/specs/BAS-20/spec.md" />
+  </Folder>
   <Folder Name="/docs/specs/archive/" />
   <Folder Name="/docs/specs/archive/BAS-1/">
     <File Path="docs/specs/archive/BAS-1/spec.md" />
