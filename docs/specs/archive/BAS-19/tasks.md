@@ -16,4 +16,14 @@ tags:
 - [x] Añadir la carpeta `docs/specs/BAS-19/` al `BasketBaseTracker.slnx`
 - [x] Validar en local con `aspire run` que `/presentacion/` sirve la página correctamente (encontrado y corregido un bug de orden del pipeline: `UseDefaultFiles()` debe ir antes de `UseRouting()`)
 - [x] Ejecutar la suite completa de tests (110, unitarios + integración) para confirmar que el cambio en `Program.cs` no rompe nada
-- [ ] Cierre: mover `docs/specs/BAS-19/` a `docs/specs/archive/BAS-19/`, actualizar estado a `Completado` y abrir el PR de `feature/BAS-19` a `develop` (sin fusionar sin confirmación humana)
+- [x] Cierre: mover `docs/specs/BAS-19/` a `docs/specs/archive/BAS-19/`, actualizar estado a `Completado` y abrir el PR de `feature/BAS-19` a `develop` (sin fusionar sin confirmación humana)
+
+## Iteración 2 (con el PR #38 abierto, antes de fusionar)
+
+- [x] Añadir diapositivas de infraestructura como código (.NET Aspire) y de despliegue continuo (GitHub Actions, OIDC, revisiones múltiples)
+- [x] Quitar la diapositiva de caso de estudio BAS-3 (Managed Identity)
+- [x] Añadir diapositiva de Claude Code multiagente con git worktrees (con el ejemplo real de `git worktree list`)
+- [x] Añadir diapositiva de skills a medida del proyecto (`.claude/skills/aspire`, `.claude/skills/dotnet`)
+- [x] Pedir permiso y descargar el logo de BIGschool a `img/bigschool-logo.svg`; corregir por CSS el recorte del lienzo vacío del fichero de origen
+- [x] Ajustar título/subtítulo a "Máster en Desarrollo con IA" · BIGschool
+- [x] Revalidar en local con `aspire run` (capturas de cada diapositiva nueva) tras un fallo transitorio de puerto en el primer intento

@@ -17,10 +17,10 @@ BasketBaseTracker se presenta como trabajo de fin de curso de un curso sobre des
 ## Alcance
 
 - Página HTML autocontenida (`reveal.js` + estilos vía CDN o embebido) en `src/BasketBaseTracker.Web/wwwroot/presentacion/`, servida como fichero estático — sin controlador, sin Razor Page, sin autenticación.
-- Contenido en español, ~12-15 diapositivas, mitad centradas en el producto (qué resuelve, capturas de pantallas reales) y mitad en el proceso de desarrollo con IA (ciclo spec→plan→tasks→implementación→cierre, gobernanza de ramas y PRs, testing).
+- Contenido en español, mitad centradas en el producto (qué resuelve, capturas de pantallas reales) y mitad en el proceso de desarrollo con IA (ciclo spec→plan→tasks→implementación→cierre, infraestructura como código y despliegue continuo, Claude Code multiagente con git worktrees, skills a medida del proyecto, gobernanza de ramas y PRs, testing).
 - Capturas de pantalla reales de las páginas **públicas** de producción (`https://web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io/`), obtenidas navegando con automatización de navegador.
 - Al menos un diagrama (arquitectura de despliegue y/o ciclo de vida de un incremento BAS-N), reutilizando o adaptando los ya existentes en `architecture.md`/`workflow.md` donde tenga sentido.
-- Un incremento BAS-N real (completado y archivado) usado como caso de estudio breve del proceso spec-driven.
+- Título y marca del curso real que motiva este TFC: "Máster en Desarrollo con IA" (BIGschool), con el logo de BIGschool en la portada, el cierre y un pie de página discreto en el resto.
 
 ## Fuera de alcance
 
@@ -32,7 +32,7 @@ BasketBaseTracker se presenta como trabajo de fin de curso de un curso sobre des
 ## Criterios de aceptación
 
 - [x] La página es accesible en `/presentacion/` sin autenticación — verificado en local con `aspire run` (mismo binario que se despliega); quedará disponible en la URL pública de producción automáticamente en cuanto este PR se fusione y el pipeline existente despliegue `main`, sin ningún paso de despliegue propio de este incremento.
-- [x] Contiene 14 diapositivas, en español: portada, contexto/problema, qué hace la app, capturas de portada+calendario, capturas de detalle de partido+clasificación, panel de administración (descripción), diagrama de arquitectura, decisiones destacadas, ciclo SDD, caso de estudio BAS-3, gobernanza, testing, estado actual, cierre.
+- [x] Contiene 16 diapositivas, en español: portada (con marca BIGschool/Máster en Desarrollo con IA), contexto/problema, qué hace la app, capturas de portada+calendario, capturas de detalle de partido+clasificación, diagrama de arquitectura, decisiones destacadas, infraestructura como código con Aspire, despliegue continuo (GitHub Actions), ciclo SDD, Claude Code multiagente con git worktrees, skills a medida, gobernanza, testing, estado actual, cierre.
 - [x] Las capturas de pantalla proceden de la URL de producción real (`web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io`), no de mockups ni de un entorno local.
 - [x] La página funciona correctamente sirviéndose como fichero estático — verificado en local con `aspire run` tras corregir el orden del pipeline (ver `plan.md`).
 - [x] No introduce ninguna dependencia nueva en `Directory.Packages.props`. El único cambio en `Program.cs` es `app.UseDefaultFiles()` (middleware estándar, sin lógica de negocio), reordenado antes de `UseRouting()` — necesario para que `/presentacion/` resuelva a `index.html`, descubierto durante la validación local (ver `plan.md`). Los 110 tests existentes (unitarios + integración) siguen en verde tras el cambio.
@@ -48,6 +48,8 @@ BasketBaseTracker se presenta como trabajo de fin de curso de un curso sobre des
 - **¿Cómo se sirve técnicamente dentro de la app?** Fichero estático en `wwwroot/` (no una Razor Page dedicada), servido directamente por el middleware de archivos estáticos de ASP.NET Core ya presente — más simple, no necesita reutilizar el layout del sitio ni tocar rutas.
 - **URL de producción para las capturas**: `https://web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io/` — el dominio propio (`basketbase.es`, BAS-4) sigue sin desplegarse, así que esta es la URL pública real actual.
 - **Admin fuera de alcance de las capturas**: no se navega el área Admin de producción con credenciales reales para este recurso; esa parte de la charla usa diagrama/descripción, no pantallazo.
+- **Iteración 2, con el PR #38 ya abierto**: el autor pidió añadir detalle de infraestructura de despliegue (GitHub Actions, Aspire, Azure), quitar la diapositiva de caso de estudio BAS-3 ("en mi opinión, no aporta"), añadir diapositivas sobre el propio uso de IA en el desarrollo (Claude Code multiagente con `git worktree`, skills a medida en `.claude/skills/`) y rebrandear con el nombre real del curso ("Máster en Desarrollo con IA", BIGschool) y su logo — ver detalle en `plan.md`.
+- **¿Se pide permiso antes de descargar el logo de un tercero?** Sí — aunque el usuario dio la URL directamente en su petición, descargar un fichero a disco es una acción que requiere confirmación explícita; se preguntó y se confirmó guardar copia local en vez de enlazar en caliente a `thebigschool.com`.
 
 ## Referencias
 

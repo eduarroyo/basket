@@ -41,12 +41,21 @@
     .reveal figcaption { font-size: 0.5em; color: #888; margin-top: 0.5em; }
     .reveal .two-col { display: flex; gap: 2em; text-align: left; }
     .reveal .two-col > div { flex: 1; }
-    .reveal .badge-ok { color: #2b8a3e; font-weight: 700; }
-    .reveal .badge-fix { color: var(--accent-dark); font-weight: 700; }
     .reveal .footline { font-size: 0.4em; color: #999; margin-top: 1.5em; }
+    .reveal table.small td { padding: 0.15em 0; }
     .reveal code { background: #f1f1f1; border-radius: 4px; }
     .reveal pre code.hljs { font-size: 0.55em; }
     .mermaid { background: transparent; }
+    .brand-footer {
+      position: fixed; right: 22px; bottom: 16px; z-index: 10; opacity: 0.55;
+    }
+    /* El fichero de origen (viewBox 1500x572) solo contiene el icono cuadrado
+       en el tercio izquierdo; se recorta con overflow:hidden en vez de
+       mostrar el resto del lienzo en blanco. */
+    .logo-crop { display: inline-block; overflow: hidden; border-radius: 6px; vertical-align: middle; }
+    .logo-crop img { display: block; height: 100%; width: auto; }
+    .brand-footer .logo-crop { width: 18px; height: 18px; }
+    .title-logo.logo-crop { width: 44px; height: 44px; margin-bottom: 1.1em; }
   </style>
 </head>
 <body>
@@ -54,7 +63,8 @@
     <div class="slides">
 
       <section>
-        <div class="tag">Trabajo de fin de curso · Desarrollo con IA</div>
+        <span class="title-logo logo-crop"><img src="img/bigschool-logo.svg" alt="BIGschool" /></span>
+        <div class="tag">Trabajo de fin de curso · Máster en Desarrollo con IA · BIGschool</div>
         <h1>BasketBaseTracker</h1>
         <p class="subtitle">Seguimiento de la competición de baloncesto base de la provincia de Sevilla</p>
         <p class="small" style="margin-top: 2em;">Eduardo Arroyo — 2026</p>
@@ -148,6 +158,37 @@ flowchart LR
       </section>
 
       <section>
+        <h2>Infraestructura como código con .NET Aspire</h2>
+        <ul class="small">
+          <li><code>AppHost.cs</code> declara toda la topología (Web, Azure SQL, Key Vault, Storage...) en C# — un único lenguaje también para la infraestructura.</li>
+          <li>En local, <code>aspire run</code> levanta contenedores equivalentes (SQL Server, Azurite) con un dashboard de logs/trazas/métricas en vivo.</li>
+          <li>En despliegue, <code>aspire deploy</code> genera el Bicep <strong>en memoria</strong> a partir de ese mismo modelo — no se escribe a disco por defecto; <code>AppHost.cs</code>, ya versionado, es la fuente real de infraestructura como código.</li>
+        </ul>
+        <p class="footline">docs/architecture.md, punto 11</p>
+      </section>
+
+      <section>
+        <h2>Despliegue continuo</h2>
+        <div class="two-col small">
+          <div>
+            <p><strong>ci.yml</strong><br/>build + tests en cada push/PR a <code>develop</code>/<code>main</code>, sin secretos de Azure</p>
+          </div>
+          <div>
+            <p><strong>publish.yml</strong><br/>push a <code>main</code>: build + tests + imagen al Azure Container Registry (sin Dockerfile)</p>
+          </div>
+          <div>
+            <p><strong>deploy.yml</strong><br/>migración de BD + despliegue como revisión sin tráfico + smoke E2E + promoción</p>
+          </div>
+        </div>
+        <ul class="small" style="margin-top: 0.8em">
+          <li>Autenticación contra Azure por <strong>OIDC</strong> (Federated Identity) — sin secretos de cliente en claro</li>
+          <li>Container Apps en modo de <strong>revisiones múltiples</strong>: la imagen nueva solo recibe tráfico si el smoke E2E pasa contra su propia URL</li>
+          <li>Rollback sin redesplegar: apuntar el tráfico a la revisión anterior</li>
+        </ul>
+        <p class="footline">docs/architecture.md, punto 13</p>
+      </section>
+
+      <section>
         <h2>El proceso: desarrollo dirigido por especificaciones</h2>
         <div class="two-col">
           <div class="small">
@@ -169,11 +210,28 @@ flowchart LR
       </section>
 
       <section>
-        <h2>Caso de estudio — BAS-3, despliegue a producción</h2>
-        <p class="small">Plan inicial: Managed Identity para que <code>Web</code> accediera a Azure SQL, según <code>architecture.md</code>.</p>
-        <p class="small"><span class="badge-fix">Incidente real:</span> el script que Aspire genera para dar de alta esa identidad fallaba de forma determinista (bug conocido de la plataforma, conflicto de versiones en el módulo de PowerShell de SQL Server).</p>
-        <p class="small"><span class="badge-ok">Resuelto:</span> se revirtió a autenticación SQL con un login de aplicación de privilegios mínimos, documentando la causa raíz y la alternativa descartada directamente en <code>architecture.md</code> y en el propio <code>spec.md</code> de BAS-3.</p>
-        <p class="footline">El valor del proceso no es "generar código que compila", es descubrir y documentar por qué un plan cambia</p>
+        <h2>Claude Code multiagente: git worktrees</h2>
+        <ul class="small">
+          <li>Varias sesiones de Claude Code trabajan <strong>en paralelo</strong> sobre el mismo repositorio, cada una en su propio <em>git worktree</em>: una copia de trabajo aislada que comparte el mismo historial.</li>
+          <li>Cada worktree vive en su propia rama <code>feature/BAS-N</code>, sin pisarse entre sesiones ni bloquear el checkout principal.</li>
+        </ul>
+        <p class="small" style="margin-top:1em"><strong>Ahora mismo, en este repositorio:</strong></p>
+        <table class="small" style="margin: 0 auto;">
+          <tr><td style="padding-right:1.5em"><code>desarrollo</code></td><td>feature/BAS-19 — esta misma presentación</td></tr>
+          <tr><td style="padding-right:1.5em"><code>documentacion</code></td><td>docs/readme-completar-documentacion</td></tr>
+          <tr><td style="padding-right:1.5em"><code>planificaion</code></td><td>feature/BAS-20</td></tr>
+        </table>
+        <p class="footline">git worktree list</p>
+      </section>
+
+      <section>
+        <h2>Skills a medida del proyecto</h2>
+        <ul class="small">
+          <li>El asistente de IA no tiene memoria entre sesiones más allá de lo que está escrito en el repositorio.</li>
+          <li><code>.claude/skills/aspire</code> y <code>.claude/skills/dotnet</code> documentan las convenciones exactas de las CLIs para este proyecto: cómo scaffoldear el AppHost, gestionar migraciones EF Core, generar CRUD de Razor Pages...</li>
+          <li>Cada bug o comportamiento inesperado de una herramienta, encontrado una vez, se registra en la skill correspondiente — la siguiente sesión no lo vuelve a redescubrir desde cero.</li>
+        </ul>
+        <p class="footline">Convertir lo aprendido en una conversación en instrucción reutilizable por las siguientes</p>
       </section>
 
       <section>
@@ -206,7 +264,7 @@ flowchart LR
       <section>
         <h2>Estado actual</h2>
         <ul class="small">
-          <li>18 incrementos <code>BAS-N</code> completados y archivados</li>
+          <li>19 incrementos <code>BAS-N</code> completados y archivados (incluida esta misma presentación)</li>
           <li>Desplegado en producción en Azure Container Apps</li>
           <li>Datos reales de 4 temporadas, varias categorías por temporada</li>
           <li>Observabilidad con OpenTelemetry → Application Insights</li>
@@ -216,9 +274,14 @@ flowchart LR
       <section>
         <h1>Gracias</h1>
         <p class="small">github.com/eduarroyo/basket</p>
+        <span class="title-logo logo-crop" style="margin-top:2em"><img src="img/bigschool-logo.svg" alt="BIGschool" /></span>
       </section>
 
     </div>
+  </div>
+
+  <div class="brand-footer">
+    <span class="logo-crop"><img src="img/bigschool-logo.svg" alt="BIGschool" /></span>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
