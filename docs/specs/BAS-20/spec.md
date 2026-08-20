@@ -1,7 +1,7 @@
 ---
 codigo: BAS-20
 titulo: Acceso al área de gestión desde el layout público
-estado: Planificado
+estado: Completado
 autor: Eduardo Arroyo
 fechaCreacion: 2026-08-20
 tags:
@@ -30,11 +30,11 @@ El enlace apunta directamente a `/Admin` (la portada del panel, `Admin/Index`), 
 
 ## Criterios de aceptación
 
-- [ ] En cualquier página del área pública, la barra de navegación muestra un enlace "Área de gestión" a la derecha.
-- [ ] Al hacer clic en el enlace sin sesión iniciada, el usuario llega a `Admin/Login` y, tras autenticarse, es redirigido a `Admin/Index`.
-- [ ] Al hacer clic en el enlace con sesión ya iniciada (p. ej. tras volver a la parte pública desde "Ver web pública" del admin), el usuario llega directamente a `Admin/Index` sin pasar por login.
-- [ ] El enlace es idéntico (mismo HTML) para usuarios autenticados y no autenticados — no depende de `User.Identity.IsAuthenticated` en el layout público.
-- [ ] Test de integración que cubra la generación del enlace y la redirección a login para un cliente no autenticado.
+- [x] En cualquier página del área pública, la barra de navegación muestra un enlace "Área de gestión" a la derecha.
+- [x] Al hacer clic en el enlace sin sesión iniciada, el usuario llega a `Admin/Login` y, tras autenticarse, es redirigido a `Admin/Index`.
+- [x] Al hacer clic en el enlace con sesión ya iniciada (p. ej. tras volver a la parte pública desde "Ver web pública" del admin), el usuario llega directamente a `Admin/Index` sin pasar por login.
+- [x] El enlace es idéntico (mismo HTML) para usuarios autenticados y no autenticados — no depende de `User.Identity.IsAuthenticated` en el layout público.
+- [x] Test de integración que cubra la generación del enlace y la redirección a login para un cliente no autenticado.
 
 ## Aclaraciones
 

@@ -1,6 +1,6 @@
 ---
 codigo: BAS-20
-estado: Borrador
+estado: Completado
 tags:
   - plan
 ---
