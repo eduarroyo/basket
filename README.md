@@ -9,8 +9,8 @@ Permite consultar de forma pública calendarios, resultados y clasificaciones de
 | Entregable | URL |
 |---|---|
 | Repositorio | <https://github.com/eduarroyo/basket> |
-| Producción | _pendiente_ |
-| Slides | _pendiente_ |
+| Producción | https://web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io/ |
+| Slides | https://web.ashymoss-b1c8f995.spaincentral.azurecontainerapps.io/presentacion |
 | Vídeo | _pendiente_ |
 
 ## Documentación
